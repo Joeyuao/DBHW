@@ -61,7 +61,7 @@
             position: fixed;
             left: 0;
             width: 200px;
-            margin-top: 60px;
+            margin-top: 39px;
             transform: translateX(-200px);
             transition: transform 250ms ease-in-out;
             background: linear-gradient(180deg, #007BFF 0%, #02448b 100%);
@@ -85,11 +85,12 @@
         }
         .sidebarMenuInner li span{
             display: block;
-            font-size: 14px;
+            font-size: 20px;
             color: rgba(255, 255, 255, 0.50);
         }
         .sidebarMenuInner li a{
             color: #fff;
+            font-size: 16px;
             text-transform: uppercase;
             font-weight: bold;
             cursor: pointer;
@@ -184,13 +185,6 @@
         background: rgba(0,0,0,.15);
         font-family: "helvetica neue",arial,sans-serif;
     }
-        .main .admin input:focus{
-            outline: none;
-            color: black;
-            font-weight: bold;
-            border-color: #4c93af; /* 聚焦时边框变为绿色 */
-            background: rgba(0,0,0,.25); /* 聚焦时背景变深 */
-        }
         .main .admin table {
             width: 100%;
             border-collapse: collapse;
@@ -235,7 +229,7 @@
   <div id="sidebarMenu">
     <ul class="sidebarMenuInner">
         <!-- <li>Jelena Jovanovic <span>Web Developer</span></li> -->
-        <button onclick="window.app.changeIsSearchSelected(false)"><li><a href="./studentPage.html" target="_blank">课程总览</a></li></button><br>
+        <button onclick="window.app.changeIsSearchSelected(false)"><li><a href="./studentPage.html" target="_blank">课程总览</a></li></button>
         <!-- <button onclick="window.app.changeIsSearchSelected(true)"><li><a href="./studentPage0.html" target="_blank">已选课程</a></li></button> -->
         <!-- <button onclick="window.location.href='./admin_teacher.html'"><li><a href="./admin_teacher.html" target="_blank">教师信息管理</a></li></button> -->
       </ul>
