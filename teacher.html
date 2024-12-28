@@ -101,7 +101,7 @@
         input[type="checkbox"]:checked ~ .main {
             margin-left: 250px;
         }
-        .sidebarMenuInner input[type=checkbox] {
+        input[type=checkbox] {
             transition: all 0.3s;
             box-sizing: border-box;
             display: none;
@@ -172,8 +172,7 @@
         border-radius: 5px;
         cursor: pointer;
     }
-    
-        .main .admin input[type="text"]{
+        .main .admin input{
         margin: 0 auto;
         padding: 0 10px;
         width: 536px;
@@ -235,29 +234,23 @@
   <div id="sidebarMenu">
     <ul class="sidebarMenuInner">
         <!-- <li>Jelena Jovanovic <span>Web Developer</span></li> -->
-        <button onclick="window.app.changeIsSearchSelected(false)"><li><a href="./studentPage.html" target="_blank">课程总览</a></li></button><br>
-        <!-- <button onclick="window.app.changeIsSearchSelected(true)"><li><a href="./studentPage0.html" target="_blank">已选课程</a></li></button> -->
-        <!-- <button onclick="window.location.href='./admin_teacher.html'"><li><a href="./admin_teacher.html" target="_blank">教师信息管理</a></li></button> -->
+        <button onclick="window.location.href='./admin_course.html'"><li><a href="./admin_course.html" target="_blank">课程管理</a></li></button>
+        <button onclick="window.location.href='./admin_students.html'"><li><a href="./admin_students.html" target="_blank">学生信息管理</a></li></button>
+        <button onclick="window.location.href='./admin_teacher.html'"><li><a href="./admin_teacher.html" target="_blank">教师信息管理</a></li></button>
       </ul>
     
   </div>
   <main class="main">
     <div id="app">
-        <student class="admin" ref="studentComponent"></student>
+        <teacher class="admin"></teacher>
     </div>
   </main>
 </body>
-<script src="js/student.js"></script>
+<script src="js/teacher.js"></script>
 <script>
-var app = new Vue({
-  el: '#app',
-  methods: {
-    changeIsSearchSelected(value) {
-      this.$refs.studentComponent.isSearchSelected = value;
-      
-    }
-  }
-});
+  new Vue({
+    el: '#app'
+  });
   
 </script>
 </html>

@@ -1,4 +1,4 @@
-Vue.component('Admin_course', {
+Vue.component('teacher', {
     template: `
       <div>
         <div>
