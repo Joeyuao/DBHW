@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>选课系统</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            position: absolute;
+            display: flex;
+            justify-content: center; /* 水平居中 */
+            align-items: center; /* 垂直居中 */
+            height: 100px; /* 根据需要设置高度 */
+        }
+
+        header img {
+            height: 50px;
+        }
+        .center-flex {
+            color: #0073ff;
+            position: absolute;
+            top: 10%;     
+            left: 50%;        /* 水平居中，距离左边50% */
+            transform: translate(-50%, -50%);  /* 将元素向上和向左移动自己的宽高的一半，实现精确居中 */
+            display: flex;
+            justify-content: center;  /* 水平居中子元素 */
+            align-items: center;      /* 垂直居中子元素 */
+        }
+
+        header h1 {
+            position: relative;
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+            color: rgb(21, 123, 212);
+            /* top: 70%; */
+            /* left: 50%; */
+            /* transform: translate(-50%, -0%); */
+            display: inline;
+            font-size: 40px;
+        }
+        main {
+            background-image: url('img/image.png'); /* 替换为你的背景图片路径 */
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+      .login-box {
+            background-color: rgba(0, 0, 0, 0.6);
+            padding: 40px;
+            border-radius: 5px;
+            text-align: center;
+        }
+      .login-box h2 {
+            color: #fff;
+            margin-top: 0;
+        }
+        .login-box button {
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            padding: 10px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 150px; /* 设置一个固定的宽度值 */
+        }
+
+      .login-box p {
+            color: #fff;
+        }
+        .text-center {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img src="img/logo.png" alt="中山大学标志"><br>
+        
+    </header>
+    <div class="center-flex">
+    <div>
+        <h1 class="text-center">大学生选课系统</h1>
+    </div>
+  </div>
+    <main>
+        <div class="login-box">
+            <h2>用户登录</h2>
+            <script>
+                function Stulogin() {
+                    window.location.href = "stulogin.html";
+                }
+                function Teachlogin() {
+                    window.location.href = "teachlogin.html";
+                }
+                function Adminlogin() {
+                    window.location.href = "Adminlogin.html";
+                }
+            </script>
+            <button onclick="Stulogin()">学生登录</button><br><br>
+            <button onclick="Teachlogin()">教师登录</button><br><br>
+            <button onclick="Adminlogin()">管理员登录</button>
+            <p>用户单位：大山中学</p>
+        </div>
+    </main>
+</body>
+</html>
