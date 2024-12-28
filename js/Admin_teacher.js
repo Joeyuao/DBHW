@@ -1,11 +1,12 @@
-Vue.component('Admin', {
+Vue.component('Admin_teacher', {
   template: `
+  
     <div>
-      <h1>课程管理</h1>
-      <h1>学生管理</h1>
-      <h2>教师名单管理</h2>
+    <div>
+    
       <input type="text" placeholder="请输入姓名" v-model="searchName">
       <button @click="search">搜索</button>
+      <button @click="showall">显示全部</button><br>
       <button @click="addTeacher">添加教师信息</button>
       <button @click="resetAllPasswords">账号密码重置</button>
       <button @click="logout">退出系统</button>
@@ -70,8 +71,9 @@ Vue.component('Admin', {
         { id: 1001, name: '刘丽', gender: '女', birthYear: '1990-03-08', education: '硕士', title: '副教授', hireYear: '2015-09-02', department: '设计系' },
         { id: 1002, name: '张立法', gender: '男', birthYear: '1984-07-02', education: '博士', title: '讲师', hireYear: '2015-09-02', department: '计算机系' },
         { id: 1003, name: '软康佳', gender: '男', birthYear: '1988-06-18', education: '硕士', title: '助教', hireYear: '2017-07-07', department: '计算机系' },
-        { id: 1004, name: '林锡鹏', gender: '男', birthYear: '1996-09-02', education: '硕士', title: '普通教师', hireYear: '2015-09-02', department: '计算机系' }
+        { id: 1024, name: '林锡鹏', gender: '男', birthYear: '1996-09-02', education: '硕士', title: '普通教师', hireYear: '2015-09-02', department: '计算机系' }
       ],
+      issearch: false,
       searchName: '',
       currentPage: 1,
       pageSize: 5,
@@ -90,10 +92,15 @@ Vue.component('Admin', {
   },
   computed: {
     filteredTeachers() {
-      return this.teachers.filter(teacher =>
-        teacher.name.includes(this.searchName)
-      );
+      if (this.issearch) {
+        return this.teachers.filter(teacher =>
+          teacher.name.includes(this.searchName)
+        );
+      } else {
+        return this.teachers;
+      }
     },
+    
     paginatedTeachers() {
       const start = (this.currentPage - 1) * this.pageSize;
       const end = start + this.pageSize;
@@ -104,8 +111,11 @@ Vue.component('Admin', {
     }
   },
   methods: {
+    showall() {
+      this.issearch = false;
+    },
     search() {
-      // 搜索逻辑已经在计算属性中实现
+      this.issearch = true;
     },
     addTeacher() {
       this.showAddModal = true;
@@ -157,5 +167,6 @@ Vue.component('Admin', {
         this.currentPage += 1;
       }
     }
+    
   }
 });
