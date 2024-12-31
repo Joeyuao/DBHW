@@ -44,66 +44,57 @@ def student_dashboard():
 def teacher_dashboard():
     return render_template('teacherlogin.html')  # 显示教师管理课程页面
 
-
 # 后端API (连接js)
 
 ## 管理员管理课程部分
 @app.route('/api/admin/course', methods=['POST'])
 def add_course():
     data = request.get_json()
-    course_id = data.get('id')
-    name = data.get('name')
-    teacher = data.get('teacher')
-    credits = data.get('credits')
-    semester = data.get('semester')
-    limit = data.get('limit')
-    course_type = data.get('type') # need to adjust
+    cid = data.get('cid')
+    cname = data.get('cname')
+    chour = data.get('chour') # need to adjust
 
-    conn = get_connection()
+    #conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute("""
-        INSERT INTO course (course_id, course_name, teacher_name, credits, semester, limit, course_type) # need to adjust
-        VALUES (%s, %s, %s, %s, %s, %s, %s)
-    """, (course_id, name, teacher, credits, semester, limit, course_type))
+        INSERT INTO courses (cid, chour, cname) 
+        VALUES (%s, %s, %s)
+    """, (cid, chour, cname))
 
     conn.commit()
     conn.close()
 
     return jsonify({"message": "课程添加成功"})
 
-@app.route('/api/admin/course/<int:course_id>', methods=['PUT'])
-def edit_course(course_id):
+@app.route('/api/admin/course/<int:cid>', methods=['PUT'])
+def edit_course(cid):
     data = request.get_json()
-    name = data.get('name')
-    teacher = data.get('teacher')
-    credits = data.get('credits')
-    semester = data.get('semester')
-    limit = data.get('limit')
-    course_type = data.get('type')
+    cname = data.get('cname')
+    chour = data.get('chour')
 
-    conn = get_connection()
+    #conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute("""
-        UPDATE course
-        SET course_name = %s, teacher_name = %s, credits = %s, semester = %s, limit = %s, course_type = %s
-        WHERE course_id = %s
-    """, (name, teacher, credits, semester, limit, course_type, course_id))
+        UPDATE courses
+        SET cname = %s, chour = %s
+        WHERE cid = %s
+    """, (cname, chour, cid))
 
     conn.commit()
     conn.close()
 
     return jsonify({"message": "课程信息更新成功"})
 
-@app.route('/api/admin/course/<int:course_id>', methods=['DELETE'])
-def delete_course(course_id):
-    conn = get_connection()
+@app.route('/api/admin/course/<int:cid>', methods=['DELETE'])
+def delete_course(cid):
+    #conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute("""
-        DELETE FROM course WHERE course_id = %s
-    """, (course_id,))
+        DELETE FROM courses WHERE cid = %s
+    """, (cid,))
 
     conn.commit()
     conn.close()
@@ -112,20 +103,21 @@ def delete_course(course_id):
 
 @app.route('/api/admin/courses', methods=['GET'])
 def search_courses():
-    course_name = request.args.get('name', '')
+    cname = request.args.get('cname', '')
 
-    conn = get_connection()
+    #conn = get_connection()
     cursor = conn.cursor(dictionary=True)
 
     cursor.execute("""
-        SELECT * FROM course WHERE course_name LIKE %s
-    """, ('%' + course_name + '%',))
+        SELECT * FROM courses WHERE cname = %s
+    """, ('%' + cname + '%',))
     
     courses = cursor.fetchall()
     conn.close()
 
     return jsonify(courses)
 
+'''
 @app.route('/api/admin/course/reset_password/<int:course_id>', methods=['POST'])
 def reset_password(course_id):
     new_password = 'new_password'
@@ -157,6 +149,7 @@ def reset_all_passwords():
     conn.close()
 
     return jsonify({"message": "所有课程的密码已重置"})
+'''
 
 ## 管理员管理学生部分
 # 添加学生接口
