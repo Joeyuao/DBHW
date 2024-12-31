@@ -1,7 +1,11 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify, send_from_directory
 from dev import conn
 
+
 app = Flask(__name__)
+
+
+
 
 # 主页面
 @app.route('/', methods=['GET', 'POST'])
@@ -12,46 +16,33 @@ def index():
 
         if user_role == 'student':
             if password == '123456':
-                return jsonify({'redirect': url_for('student_dashboard')})
+                return jsonify({'redirect': url_for('stulogin')}) # 对应的前端
             else:
                 return jsonify({'error': '学生密码错误！'}), 400
         elif user_role == 'admin':
             if password == '123456':
-                return jsonify({'redirect': url_for('admin_dashboard')})
+                return jsonify({'redirect': url_for('Adminlogin')}) # 对应的前端
             else:
                 return jsonify({'error': '管理员密码错误！'}), 400
         elif user_role == 'teacher':
             if password == '123456':
-                return jsonify({'redirect': url_for('teacher_dashboard')})
+                return jsonify({'redirect': url_for('teachlogin')}) # 对应的前端
             else:
                 return jsonify({'error': '教师密码错误！'}), 400
 
     return render_template('index.html')
 
-# 学生登录页面
-@app.route('/stulogin', methods=['GET'])
-def stulogin():
-    return render_template('stulogin.html')
-
-# 教师登录页面
-@app.route('/teachlogin', methods=['GET'])
-def teachlogin():
-    return render_template('teachlogin.html')
-
-# 管理员登录页面
-@app.route('/Adminlogin', methods=['GET'])
-def adminlogin():
-    return render_template('Adminlogin.html')
-
 # 学生面板路由
 @app.route('/studentPage', methods=['GET'])
 def student_dashboard():
-    return render_template('studentPage.html')
+    return render_template('studentPage.html')  # 显示学生选课页面
+
+
 
 # 教师面板路由
 @app.route('/teacherlogin', methods=['GET'])
 def teacher_dashboard():
-    return render_template('teacherlogin.html')
+    return render_template('teacherlogin.html')  # 显示教师管理课程页面
 
 # 后端API (连接js)
 
@@ -408,7 +399,7 @@ def reset_all_passwords():
 ## 学生选课部分
 # 获取课程列表（分页查询）
 @app.route('/api/students/courses', methods=['GET'])
-def students_get_courses():
+def get_courses():
     page = int(request.args.get('page', 1))  # 页码
     per_page = int(request.args.get('per_page', 10))  # 每页显示多少课程
 
@@ -522,8 +513,8 @@ def reset_all_course_passwords():
 
 ## 老师管理课程
 # 获取学生列表（分页查询）
-@app.route('/api/teachers/courses/<int:tid>', methods=['GET'])
-def teacher_get_courses(tid):
+@app.route('/api/teachers/courses/<int: tid>', methods=['GET'])
+def get_courses(tid):
     page = int(request.args.get('page', 1))  # 页码
     per_page = int(request.args.get('per_page', 10))  # 每页显示多少课程
 
