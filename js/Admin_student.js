@@ -13,23 +13,17 @@ Vue.component('Admin_student', {
             <tr>
               <th>学号</th>
               <th>姓名</th>
-              <th>性别</th>
-              <th>出生年份</th>
-              <th>专业</th>
-              <th>入学年份</th>
-              <th>学院</th>
+              <th>邮箱</th>
+              <th>年级</th>
               <th>操作</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="student in paginatedStudents" :key="student.id">
-              <td>{{ student.id }}</td>
-              <td>{{ student.name }}</td>
-              <td>{{ student.gender }}</td>
-              <td>{{ student.birthYear }}</td>
-              <td>{{ student.major }}</td>
-              <td>{{ student.enrollmentYear }}</td>
-              <td>{{ student.department }}</td>
+            <tr v-for="student in paginatedStudents" :key="student.sid">
+              <td>{{ student.sid }}</td>
+              <td>{{ student.sname }}</td>
+              <td>{{ student.email }}</td>
+              <td>{{ student.grade }}</td>
               <td>
                 <button @click="editStudent(student)">修改</button>
                 <button @click="deleteStudent(student)">删除</button>
@@ -47,13 +41,11 @@ Vue.component('Admin_student', {
         <div v-if="showAddModal" class="modal">
           <div class="modal-content">
             <h3>添加学生信息</h3>
-            <input type="text" v-model="newStudent.id" placeholder="学号">
-            <input type="text" v-model="newStudent.name" placeholder="姓名">
-            <input type="text" v-model="newStudent.gender" placeholder="性别">
-            <input type="text" v-model="newStudent.birthYear" placeholder="出生年份">
-            <input type="text" v-model="newStudent.major" placeholder="专业">
-            <input type="text" v-model="newStudent.enrollmentYear" placeholder="入学年份">
-            <input type="text" v-model="newStudent.department" placeholder="学院">
+            <input type="text" v-model="newStudent.sid" placeholder="学号">
+            <input type="text" v-model="newStudent.sname" placeholder="姓名">
+            <input type="text" v-model="newStudent.email" placeholder="邮箱">
+            <input type="number" v-model="newStudent.grade" placeholder="年级">
+            <input type="text" v-model="newStudent.dep" placeholder="学院">
             <button @click="saveStudent">保存</button>
             <button @click="showAddModal = false">关闭</button>
           </div>
@@ -63,25 +55,18 @@ Vue.component('Admin_student', {
   `,
   data() {
     return {
-      students: [
-        { id: 2001, name: '张三', gender: '男', birthYear: '2000-05-12', major: '计算机科学', enrollmentYear: '2018-09-01', department: '计算机系' },
-        { id: 2002, name: '李四', gender: '女', birthYear: '2000-08-25', major: '软件工程', enrollmentYear: '2018-09-01', department: '计算机系' },
-        { id: 2003, name: '王五', gender: '男', birthYear: '1999-12-10', major: '电子工程', enrollmentYear: '2017-09-01', department: '电子工程系' },
-        { id: 2004, name: '赵六', gender: '女', birthYear: '2001-03-03', major: '机械设计', enrollmentYear: '2019-09-01', department: '机械工程系' }
-      ],
+      students: [], // 从后端获取的学生数据
       issearch: false,
       searchName: '',
       currentPage: 1,
       pageSize: 5,
       showAddModal: false,
       newStudent: {
-        id: '',
-        name: '',
-        gender: '',
-        birthYear: '',
-        major: '',
-        enrollmentYear: '',
-        department: ''
+        sid: '',
+        sname: '',
+        email: '',
+        grade: null,
+        dep: ''
       }
     };
   },
@@ -89,7 +74,7 @@ Vue.component('Admin_student', {
     filteredStudents() {
       if (this.issearch) {
         return this.students.filter(student =>
-          student.name.includes(this.searchName)
+          student.sname.includes(this.searchName)
         );
       } else {
         return this.students;
@@ -115,32 +100,78 @@ Vue.component('Admin_student', {
       this.showAddModal = true;
     },
     saveStudent() {
-      this.students.push({ ...this.newStudent });
-      this.showAddModal = false;
-      this.newStudent = {
-        id: '',
-        name: '',
-        gender: '',
-        birthYear: '',
-        major: '',
-        enrollmentYear: '',
-        department: ''
-      };
+      // 调用后端 API 添加学生
+      fetch('/api/admin/students', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(this.newStudent),
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.message) {
+            alert(data.message);
+            this.fetchStudents(); // 重新获取学生列表
+            this.showAddModal = false;
+            this.newStudent = {
+              sid: '',
+              sname: '',
+              email: '',
+              grade: null,
+              dep: ''
+            };
+          }
+        })
+        .catch(error => console.error('Error:', error));
     },
     editStudent(student) {
-      // 实现编辑学生信息的逻辑
-      alert(`编辑 ${student.name} 的信息`);
+      // 调用后端 API 编辑学生信息
+      const updatedStudent = {
+        sid: student.sid,
+        sname: prompt('请输入新的姓名', student.sname),
+        email: prompt('请输入新的邮箱', student.email),
+        grade: prompt('请输入新的年级', student.grade),
+        dep: prompt('请输入新的学院', student.dep)
+      };
+
+      if (updatedStudent.sname && updatedStudent.email && updatedStudent.grade && updatedStudent.dep) {
+        fetch(`/api/admin/students/${student.sid}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(updatedStudent),
+        })
+          .then(response => response.json())
+          .then(data => {
+            if (data.message) {
+              alert(data.message);
+              this.fetchStudents(); // 重新获取学生列表
+            }
+          })
+          .catch(error => console.error('Error:', error));
+      }
     },
     deleteStudent(student) {
-      // 实现删除学生信息的逻辑
-      const index = this.students.indexOf(student);
-      if (index !== -1) {
-        this.students.splice(index, 1);
+      // 调用后端 API 删除学生
+      if (confirm(`确定要删除学生 ${student.sname} 吗？`)) {
+        fetch(`/api/admin/students/${student.sid}`, {
+          method: 'DELETE',
+        })
+          .then(response => response.json())
+          .then(data => {
+            if (data.message) {
+              alert(data.message);
+              this.fetchStudents(); // 重新获取学生列表
+            }
+          })
+          .catch(error => console.error('Error:', error));
       }
     },
     resetPassword(student) {
       // 实现修改学生密码的逻辑
-      alert(`重置 ${student.name} 的密码`);
+      alert(`重置 ${student.sname} 的密码`);
     },
     resetAllPasswords() {
       // 实现重置所有学生密码的逻辑
@@ -148,7 +179,17 @@ Vue.component('Admin_student', {
     },
     logout() {
       // 实现退出系统的逻辑
-      alert('退出系统');
+      fetch('/api/logout', {
+        method: 'POST',
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.message) {
+            alert(data.message);
+            window.location.href = '/'; // 跳转到登录页面
+          }
+        })
+        .catch(error => console.error('Error:', error));
     },
     prevPage() {
       if (this.currentPage > 1) {
@@ -159,6 +200,19 @@ Vue.component('Admin_student', {
       if (this.currentPage < this.totalPages) {
         this.currentPage += 1;
       }
+    },
+    fetchStudents() {
+      // 从后端获取学生列表
+      fetch('/api/admin/students')
+        .then(response => response.json())
+        .then(data => {
+          this.students = data;
+        })
+        .catch(error => console.error('Error:', error));
     }
+  },
+  mounted() {
+    // 组件加载时获取学生列表
+    this.fetchStudents();
   }
 });
