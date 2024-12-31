@@ -453,7 +453,7 @@ def select_course():
 
     # 选课操作
     cursor.execute("""
-        INSERT INTO student_course (no, sid, tid, cid)
+        INSERT INTO choices (no, sid, tid, cid)
         VALUES (%s, %s, %s, %s)
     """, (no, sid, tid, cid))
 
@@ -475,7 +475,7 @@ def drop_course():
 
     # 检查学生是否选了这门课
     cursor.execute("""
-        SELECT * FROM student_course WHERE sid = %s AND cid = %s
+        SELECT * FROM choices WHERE sid = %s AND cid = %s
     """, (sid, cid))
 
     if not cursor.fetchone():
@@ -484,7 +484,7 @@ def drop_course():
 
     # 退课操作
     cursor.execute("""
-        DELETE FROM student_course WHERE sid = %s AND cid = %s
+        DELETE FROM choices WHERE sid = %s AND cid = %s
     """, (sid, cid))
 
     conn.commit()
