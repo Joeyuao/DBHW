@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify, send_from_directory
 from dev import conn
 
+
 app = Flask(__name__)
 
 @app.route('/', methods=['GET', 'POST'])
@@ -35,7 +36,7 @@ def stulogin():
 # 教师登录页面
 @app.route('/teachlogin', methods=['GET'])
 def teachlogin():
-    return render_template('teachlogin.html')
+    return render_template('teach.html')
 
 # 管理员登录页面
 @app.route('/Adminlogin', methods=['GET'])
@@ -45,7 +46,6 @@ def adminlogin():
 # 学生面板路由
 @app.route('/studentPage', methods=['GET'])
 def student_dashboard():
-    print('student_dashboard')
     return render_template('studentPage.html')
 
 # 教师面板路由
@@ -413,7 +413,7 @@ def reset_all_passwords():
 ## 学生选课部分
 # 获取课程列表（分页查询）
 @app.route('/api/students/courses', methods=['GET'])
-def students_get_courses():
+def get_courses():
     page = int(request.args.get('page', 1))  # 页码
     per_page = int(request.args.get('per_page', 10))  # 每页显示多少课程
 
@@ -528,7 +528,7 @@ def reset_all_course_passwords():
 ## 老师管理课程
 # 获取学生列表（分页查询）
 @app.route('/api/teachers/courses/<int:tid>', methods=['GET'])
-def teacher_get_courses(tid):
+def get_courses_tid(tid):
     page = int(request.args.get('page', 1))  # 页码
     per_page = int(request.args.get('per_page', 10))  # 每页显示多少课程
 
