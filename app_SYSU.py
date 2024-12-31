@@ -47,7 +47,7 @@ def teacher_dashboard():
 # 后端API (连接js)
 
 ## 管理员管理课程部分
-@app.route('/api/admin/course', methods=['POST'])
+@app.route('/api/admin/courses', methods=['POST'])
 def add_course():
     data = request.get_json()
     cid = data.get('cid')
@@ -67,7 +67,7 @@ def add_course():
 
     return jsonify({"message": "课程添加成功"})
 
-@app.route('/api/admin/course/<int:cid>', methods=['PUT'])
+@app.route('/api/admin/courses/<int:cid>', methods=['PUT'])
 def edit_course(cid):
     data = request.get_json()
     cname = data.get('cname')
@@ -87,7 +87,7 @@ def edit_course(cid):
 
     return jsonify({"message": "课程信息更新成功"})
 
-@app.route('/api/admin/course/<int:cid>', methods=['DELETE'])
+@app.route('/api/admin/courses/<int:cid>', methods=['DELETE'])
 def delete_course(cid):
     #conn = get_connection()
     cursor = conn.cursor()
@@ -153,24 +153,22 @@ def reset_all_passwords():
 
 ## 管理员管理学生部分
 # 添加学生接口
-@app.route('/api/admin/student', methods=['POST'])
+@app.route('/api/admin/students', methods=['POST'])
 def add_student():
     data = request.get_json()
-    student_id = data.get('id')
-    name = data.get('name')
-    gender = data.get('gender')
-    birth_year = data.get('birthYear')
-    major = data.get('major')
-    enrollment_year = data.get('enrollmentYear')
-    department = data.get('department')
-
-    conn = get_connection()
+    sid = data.get('sid')
+    sname = data.get('sname')
+    email = data.get('email')
+    grade = data.get('grade')
+    dep = data.get('dep')
+    
+    #conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute("""
-        INSERT INTO student (student_id, name, gender, birth_year, major, enrollment_year, department)
-        VALUES (%s, %s, %s, %s, %s, %s, %s)
-    """, (student_id, name, gender, birth_year, major, enrollment_year, department))
+        INSERT INTO students (sid, sname, email, grade, dep)
+        VALUES (%s, %s, %s, %s, %s)
+    """, (sid, sname, email, grade, dep))
 
     conn.commit()
     conn.close()
@@ -178,24 +176,23 @@ def add_student():
     return jsonify({"message": "学生添加成功"})
 
 # 编辑学生信息接口
-@app.route('/api/admin/student/<int:student_id>', methods=['PUT'])
-def edit_student(student_id):
+@app.route('/api/admin/students/<int:sid>', methods=['PUT'])
+def edit_student(sid):
     data = request.get_json()
-    name = data.get('name')
-    gender = data.get('gender')
-    birth_year = data.get('birthYear')
-    major = data.get('major')
-    enrollment_year = data.get('enrollmentYear')
-    department = data.get('department')
+    sid = data.get('sid')
+    sname = data.get('sname')
+    email = data.get('email')
+    grade = data.get('grade')
+    dep = data.get('dep')
 
-    conn = get_connection()
+    #conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute("""
-        UPDATE student
-        SET name = %s, gender = %s, birth_year = %s, major = %s, enrollment_year = %s, department = %s
-        WHERE student_id = %s
-    """, (name, gender, birth_year, major, enrollment_year, department, student_id))
+        UPDATE students
+        SET sname = %s, email = %s, grade = %s, dep = %s
+        WHERE sid = %s
+    """, (sname, email, grade, dep, sid))
 
     conn.commit()
     conn.close()
@@ -203,20 +200,21 @@ def edit_student(student_id):
     return jsonify({"message": "学生信息更新成功"})
 
 # 删除学生信息接口
-@app.route('/api/admin/student/<int:student_id>', methods=['DELETE'])
-def delete_student(student_id):
-    conn = get_connection()
+@app.route('/api/admin/students/<int:sid>', methods=['DELETE'])
+def delete_student(sid):
+    #conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute("""
-        DELETE FROM student WHERE student_id = %s
-    """, (student_id,))
+        DELETE FROM students WHERE sid = %s
+    """, (sid,))
 
     conn.commit()
     conn.close()
 
     return jsonify({"message": "学生删除成功"})
 
+'''
 # 重置学生密码接口
 @app.route('/api/admin/student/reset_password/<int:student_id>', methods=['POST'])
 def reset_password(student_id):
@@ -250,18 +248,19 @@ def reset_all_student_passwords():
     conn.close()
 
     return jsonify({"message": "所有学生的密码已重置"})
+'''
 
 # 获取学生信息接口（可以进行分页和搜索）
 @app.route('/api/admin/students', methods=['GET'])
 def get_students():
-    name = request.args.get('name', '')  # 用于搜索学生名字
+    sname = request.args.get('sname', '')  # 用于搜索学生名字
 
-    conn = get_connection()
+    #conn = get_connection()
     cursor = conn.cursor(dictionary=True)
 
     cursor.execute("""
-        SELECT * FROM student WHERE name LIKE %s
-    """, ('%' + name + '%',))
+        SELECT * FROM student WHERE sname LIKE %s
+    """, ('%' + sname + '%',))
 
     students = cursor.fetchall()
     conn.close()
