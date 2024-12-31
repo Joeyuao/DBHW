@@ -54,12 +54,7 @@ Vue.component('Admin_teacher', {
   `,
   data() {
     return {
-      teachers: [
-        { tid: 1001, tname: '刘丽', email: 'liuli@example.com', salary: 8000 },
-        { tid: 1002, tname: '张立法', email: 'zhanglifa@example.com', salary: 9000 },
-        { tid: 1003, tname: '软康佳', email: 'ruankangjia@example.com', salary: 7500 },
-        { tid: 1024, tname: '林锡鹏', email: 'linxipeng@example.com', salary: 8500 }
-      ],
+      teachers: [],
       issearch: false,
       searchName: '',
       currentPage: 1,
@@ -69,7 +64,7 @@ Vue.component('Admin_teacher', {
         tid: '',
         tname: '',
         email: '',
-        salary: null // 初始化为 null 或 0
+        salary: null
       }
     };
   },
@@ -93,8 +88,16 @@ Vue.component('Admin_teacher', {
     }
   },
   methods: {
+    fetchTeachers() {
+      fetch('/api/admin/teachers')
+        .then(response => response.json())
+        .then(data => {
+          this.teachers = data.teachers;
+        });
+    },
     showall() {
       this.issearch = false;
+      this.fetchTeachers();
     },
     search() {
       this.issearch = true;
@@ -103,37 +106,69 @@ Vue.component('Admin_teacher', {
       this.showAddModal = true;
     },
     saveTeacher() {
-      this.teachers.push({ ...this.newTeacher });
-      this.showAddModal = false;
-      this.newTeacher = {
-        tid: '',
-        tname: '',
-        email: '',
-        salary: null // 重置为 null 或 0
-      };
+      fetch('/api/admin/teachers', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(this.newTeacher)
+      })
+      .then(response => response.json())
+      .then(data => {
+        this.showAddModal = false;
+        this.newTeacher = { tid: '', tname: '', email: '', salary: null };
+        this.fetchTeachers();
+      });
     },
     editTeacher(teacher) {
-      // 实现编辑教师信息的逻辑
-      alert(`编辑 ${teacher.tname} 的信息`);
+      fetch(`/api/admin/teachers/${teacher.tid}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(teacher)
+      })
+      .then(response => response.json())
+      .then(data => {
+        this.fetchTeachers();
+      });
     },
     deleteTeacher(teacher) {
-      // 实现删除教师信息的逻辑
-      const index = this.teachers.indexOf(teacher);
-      if (index !== -1) {
-        this.teachers.splice(index, 1);
-      }
+      fetch(`/api/admin/teachers/${teacher.tid}`, {
+        method: 'DELETE'
+      })
+      .then(response => response.json())
+      .then(data => {
+        this.fetchTeachers();
+      });
     },
     resetPassword(teacher) {
-      // 实现修改教师密码的逻辑
-      alert(`重置 ${teacher.tname} 的密码`);
+      fetch(`/api/admin/teacher/reset_password/${teacher.tid}`, {
+        method: 'POST'
+      })
+      .then(response => response.json())
+      .then(data => {
+        alert(`教师 ${teacher.tname} 的密码已重置`);
+      });
     },
     resetAllPasswords() {
-      // 实现重置所有教师密码的逻辑
-      alert('重置所有教师的密码');
+      fetch('/api/admin/reset_all_teacher_passwords', {
+        method: 'POST'
+      })
+      .then(response => response.json())
+      .then(data => {
+        alert('所有教师的密码已重置');
+      });
     },
     logout() {
-      // 实现退出系统的逻辑
-      alert('退出系统');
+      fetch('/api/logout', {
+        method: 'POST'
+      })
+      .then(response => response.json())
+      .then(data => {
+        alert('成功退出');
+        window.location.href = '/';
+      });
     },
     prevPage() {
       if (this.currentPage > 1) {
@@ -145,5 +180,8 @@ Vue.component('Admin_teacher', {
         this.currentPage += 1;
       }
     }
+  },
+  mounted() {
+    this.fetchTeachers();
   }
 });
