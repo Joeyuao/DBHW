@@ -3,26 +3,25 @@ from dev import conn
 
 app = Flask(__name__)
 
-# 主页面
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
         user_role = request.form.get('role')
         password = request.form.get('password')
-
+        print(user_role, password)
         if user_role == 'student':
             if password == '123456':
-                return jsonify({'redirect': url_for('student_dashboard')})
+                return jsonify({'redirect': url_for('/stulogin')}) # 对应的前端
             else:
                 return jsonify({'error': '学生密码错误！'}), 400
         elif user_role == 'admin':
             if password == '123456':
-                return jsonify({'redirect': url_for('admin_dashboard')})
+                return jsonify({'redirect': url_for('/Adminlogin')}) # 对应的前端
             else:
                 return jsonify({'error': '管理员密码错误！'}), 400
         elif user_role == 'teacher':
             if password == '123456':
-                return jsonify({'redirect': url_for('teacher_dashboard')})
+                return jsonify({'redirect': url_for('/teachlogin')}) # 对应的前端
             else:
                 return jsonify({'error': '教师密码错误！'}), 400
 
@@ -46,12 +45,18 @@ def adminlogin():
 # 学生面板路由
 @app.route('/studentPage', methods=['GET'])
 def student_dashboard():
+    print('student_dashboard')
     return render_template('studentPage.html')
 
 # 教师面板路由
-@app.route('/teacherlogin', methods=['GET'])
+@app.route('/teacherPage', methods=['GET'])
 def teacher_dashboard():
-    return render_template('teacherlogin.html')
+    return render_template('teacherPage.html')
+
+# 管理员面板路由
+@app.route('/admin_course', methods=['GET'])
+def admin_dashboard():
+    return render_template('admin_course.html')
 
 # 后端API (连接js)
 

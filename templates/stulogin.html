@@ -82,59 +82,52 @@
             height: 23px;
         }
     </style>
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>选课系统</title>
-        <style>
-            /* 样式保持不变 */
-        </style>
-    </head>
-    <body>
-        <header>
-            <img src="/static/img/logo.png" alt="中山大学标志"><br>
-        </header>
-        <div class="center-flex">
-            <div>
-                <h1 class="text-center">大学生选课系统</h1>
-            </div>
-        </div>
-        <main>
-            <div class="login-box">
-                <h2>学生登录</h2>
-                <form class="info" action="/" method="POST">
-                    <input type="hidden" name="role" value="student">
-                    <label for="StudentID">学号：</label>
-                    <input name="StudentID" placeholder="请输入学生学号"><br><br>
-    
-                    <label for="password">密码：</label>
-                    <input type="password" name="password" placeholder="请输入密码">
-                </form>
-                <br>
-                <button type="submit">登录</button>
-                <p>用户单位：大山中学</p>
-            </div>
-        </main>
-        <script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
             document.querySelector('form').addEventListener('submit', async function(event) {
                 event.preventDefault(); // 阻止表单的默认提交行为
-    
+
                 const formData = new FormData(this);
                 const response = await fetch('/', {
                     method: 'POST',
                     body: formData
                 });
-    
+
                 const result = await response.json();
-    
+
                 if (result.redirect) {
                     window.location.href = result.redirect; // 重定向到指定页面
                 } else if (result.error) {
                     alert(result.error); // 显示错误信息
                 }
             });
-        </script>
-    </body>
-    </html>
+        });
+    </script>
+</head>
+<body>
+    <header>
+        <img src="/static/img/logo.png" alt="中山大学标志"><br>
+    </header>
+    <div class="center-flex">
+        <div>
+            <h1 class="text-center">大学生选课系统</h1>
+        </div>
+    </div>
+    <main>
+        <div class="login-box">
+            <h2>学生登录</h2>
+            <form class="info" action="/" method="POST">
+                <input type="hidden" name="role" value="student"> <!-- 添加隐藏字段，确保角色为student -->
+                <label for="StudentID">学号：</label>
+                <input name="StudentID" placeholder="请输入学生学号"><br><br>
+
+                <label for="password">密码：</label>
+                <input type="password" name="password" placeholder="请输入密码">
+            </form>
+            <br>
+            <button type="submit" onclick="document.querySelector('.info').submit()">登录</button>
+            <p>用户单位：大山中学</p>
+        </div>
+    </main>
+</body>
+</html>

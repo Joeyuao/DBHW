@@ -83,22 +83,24 @@
         }
     </style>
     <script>
-        document.querySelector('form').addEventListener('submit', async function(event) {
-            event.preventDefault(); // 阻止表单的默认提交行为
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelector('form').addEventListener('submit', async function(event) {
+                event.preventDefault(); // 阻止表单的默认提交行为
 
-            const formData = new FormData(this);
-            const response = await fetch('/', {
-                method: 'POST',
-                body: formData
+                const formData = new FormData(this);
+                const response = await fetch('/', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.redirect) {
+                    window.location.href = result.redirect; // 重定向到指定页面
+                } else if (result.error) {
+                    alert(result.error); // 显示错误信息
+                }
             });
-
-            const result = await response.json();
-
-            if (result.redirect) {
-                window.location.href = result.redirect; // 重定向到指定页面
-            } else if (result.error) {
-                alert(result.error); // 显示错误信息
-            }
         });
     </script>
 </head>
@@ -123,7 +125,7 @@
                 <input type="password" name="password" placeholder="请输入密码">
             </form>
             <br>
-            <button type="submit">登录</button>
+            <button type="submit" onclick="document.querySelector('.info').submit()">登录</button>
             <p>用户单位：大山中学</p>
         </div>
     </main>
