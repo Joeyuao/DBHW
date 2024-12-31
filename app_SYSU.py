@@ -432,15 +432,20 @@ def get_courses():
 # 学生选课
 @app.route('/api/students/select_course', methods=['POST'])
 def select_course():
+    cursor = conn.cursor(dictionary=True)
+
     data = request.get_json()
-    course_id = data.get('course_id')
-    student_id = data.get('student_id')
+    no = data.get('no')
+    sid = data.get('sid')
+    tid = data.get('tid')
+    cid = data.get('cid')
+    #score = data.get('score')
 
 
     # 检查学生是否已经选了这门课
     cursor.execute("""
-        SELECT * FROM student_course WHERE student_id = %s AND course_id = %s
-    """, (student_id, course_id))
+        SELECT * FROM choices WHERE sid = %s AND cid = %s
+    """, (sid, cid))
 
     if cursor.fetchone():
         conn.close()
@@ -448,14 +453,9 @@ def select_course():
 
     # 选课操作
     cursor.execute("""
-        INSERT INTO student_course (student_id, course_id)
-        VALUES (%s, %s)
-    """, (student_id, course_id))
-
-    # 更新课程的现有人数
-    cursor.execute("""
-        UPDATE course SET nownumber = nownumber + 1 WHERE course_id = %s
-    """, (course_id,))
+        INSERT INTO choices (no, sid, tid, cid)
+        VALUES (%s, %s, %s, %s)
+    """, (no, sid, tid, cid))
 
     conn.commit()
     conn.close()
@@ -463,19 +463,20 @@ def select_course():
     return jsonify({"message": "选课成功"})
 
 # 学生退课
-@app.route('/api/student/drop_course', methods=['POST'])
+@app.route('/api/students/drop_course', methods=['POST'])
 def drop_course():
     data = request.get_json()
-    course_id = data.get('course_id')
-    student_id = data.get('student_id')
+    sid = data.get('sid')
+    tid = data.get('tid')
+    cid = data.get('cid')
 
-    conn = get_connection()
+    #conn = get_connection()
     cursor = conn.cursor()
 
     # 检查学生是否选了这门课
     cursor.execute("""
-        SELECT * FROM student_course WHERE student_id = %s AND course_id = %s
-    """, (student_id, course_id))
+        SELECT * FROM choices WHERE sid = %s AND cid = %s
+    """, (sid, cid))
 
     if not cursor.fetchone():
         conn.close()
@@ -483,19 +484,15 @@ def drop_course():
 
     # 退课操作
     cursor.execute("""
-        DELETE FROM student_course WHERE student_id = %s AND course_id = %s
-    """, (student_id, course_id))
-
-    # 更新课程的现有人数
-    cursor.execute("""
-        UPDATE course SET nownumber = nownumber - 1 WHERE course_id = %s
-    """, (course_id,))
+        DELETE FROM choices WHERE sid = %s AND cid = %s
+    """, (sid, cid))
 
     conn.commit()
     conn.close()
 
     return jsonify({"message": "退课成功"})
 
+'''
 # 重置所有课程密码
 @app.route('/api/admin/reset_all_course_passwords', methods=['POST'])
 def reset_all_course_passwords():
@@ -512,28 +509,28 @@ def reset_all_course_passwords():
     conn.close()
 
     return jsonify({"message": "所有课程密码已重置"})
-
+'''
 
 ## 老师管理课程
-# 获取课程列表（分页查询）
-@app.route('/api/teacher/courses', methods=['GET'])
-def get_courses():
+# 获取学生列表（分页查询）
+@app.route('/api/teachers/courses/<int: tid>', methods=['GET'])
+def get_courses(tid):
     page = int(request.args.get('page', 1))  # 页码
     per_page = int(request.args.get('per_page', 10))  # 每页显示多少课程
 
     offset = (page - 1) * per_page  # 分页偏移量
 
-    conn = get_connection()
+    #conn = get_connection()
     cursor = conn.cursor(dictionary=True)
 
     cursor.execute("""
-        SELECT * FROM course LIMIT %s OFFSET %s
-    """, (per_page, offset))
+        SELECT sid FROM choices WHERE tid = %s LIMIT %s OFFSET %s
+    """, (tid, per_page, offset))
 
     courses = cursor.fetchall()
 
     cursor.execute("""
-        SELECT COUNT(*) FROM course
+        SELECT COUNT(*) FROM choices
     """)
     
     total_courses = cursor.fetchone()['count']
@@ -542,73 +539,11 @@ def get_courses():
     conn.close()
 
     return jsonify({
-        'courses': courses,
+        'choicess': courses,
         'current_page': page,
         'total_pages': total_pages,
     })
 
-# 添加课程
-@app.route('/api/teacher/course', methods=['POST'])
-def add_course():
-    data = request.get_json()
-    course_id = data.get('id')
-    name = data.get('name')
-    teacher = data.get('teacher')
-    credits = data.get('credits')
-    semester = data.get('semester')
-    course_type = data.get('type')
-
-    conn = get_connection()
-    cursor = conn.cursor()
-
-    cursor.execute("""
-        INSERT INTO course (course_id, course_name, teacher_name, credits, semester, course_type)
-        VALUES (%s, %s, %s, %s, %s, %s)
-    """, (course_id, name, teacher, credits, semester, course_type))
-
-    conn.commit()
-    conn.close()
-
-    return jsonify({"message": "课程添加成功"})
-
-# 编辑课程
-@app.route('/api/teacher/course/<int:course_id>', methods=['PUT'])
-def edit_course(course_id):
-    data = request.get_json()
-    name = data.get('name')
-    teacher = data.get('teacher')
-    credits = data.get('credits')
-    semester = data.get('semester')
-    course_type = data.get('type')
-
-    conn = get_connection()
-    cursor = conn.cursor()
-
-    cursor.execute("""
-        UPDATE course
-        SET course_name = %s, teacher_name = %s, credits = %s, semester = %s, course_type = %s
-        WHERE course_id = %s
-    """, (name, teacher, credits, semester, course_type, course_id))
-
-    conn.commit()
-    conn.close()
-
-    return jsonify({"message": "课程信息更新成功"})
-
-# 删除课程
-@app.route('/api/teacher/course/<int:course_id>', methods=['DELETE'])
-def delete_course(course_id):
-    conn = get_connection()
-    cursor = conn.cursor()
-
-    cursor.execute("""
-        DELETE FROM course WHERE course_id = %s
-    """, (course_id,))
-
-    conn.commit()
-    conn.close()
-
-    return jsonify({"message": "课程删除成功"})
 
 ## 登出，只需实现一次即可
 @app.route('/api/logout', methods=['POST'])
