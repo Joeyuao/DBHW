@@ -11,25 +11,21 @@ Vue.component('teacher', {
         <table>
           <thead>
             <tr>
-              <th>课程编号</th>
-              <th>课程名称</th>
-              <th>授课教师</th>
-              <th>学分</th>
-              <th>开课学期</th>
-              <th>课程类型</th>
-              <th>上限人数</th>
+              <th>编号</th>
+              <th>学生ID</th>
+              <th>教师ID</th>
+              <th>课程ID</th>
+              <th>分数</th>
               <th>操作</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="course in paginatedCourses" :key="course.id">
-              <td>{{ course.id }}</td>
-              <td>{{ course.name }}</td>
-              <td>{{ course.teacher }}</td>
-              <td>{{ course.credits }}</td>
-              <td>{{ course.semester }}</td>
-              <td>{{ course.type }}</td>
-              <td>{{ course.limit }}</td>
+            <tr v-for="course in paginatedCourses" :key="course.no">
+              <td>{{ course.no }}</td>
+              <td>{{ course.sid }}</td>
+              <td>{{ course.tid }}</td>
+              <td>{{ course.cid }}</td>
+              <td>{{ course.score }}</td>
               <td v-if="isMyCourse(course)">
                 <button @click="editCourse(course)">修改</button>
                 <button @click="deleteCourse(course)">删除</button>
@@ -64,12 +60,7 @@ Vue.component('teacher', {
   `,
   data() {
     return {
-      courses: [
-        { id: 3001, name: '数据结构', teacher: '张老师', credits: 3, semester: '2023秋季', limit: 100, type: '必修' },
-        { id: 3002, name: '操作系统', teacher: '李老师', credits: 4, semester: '2023秋季', limit: 100, type: '必修' },
-        { id: 3003, name: '计算机网络', teacher: '王老师', credits: 3, semester: '2023春季', limit: 100, type: '选修' },
-        { id: 3004, name: '数据库原理', teacher: '赵老师', credits: 3, semester: '2023春季', limit: 100, type: '必修' }
-      ],
+      courses: [],
       issearch: false,
       searchName: '',
       currentPage: 1,
@@ -82,7 +73,6 @@ Vue.component('teacher', {
         teacher: '当前老师', // 替换为实际的老师名称
         credits: '',
         semester: '',
-        limit: 100,
         type: ''
       }
     };
@@ -113,6 +103,18 @@ Vue.component('teacher', {
     }
   },
   methods: {
+    fetchCourses() {
+      const tid = 1; // 假设当前教师的ID是1
+      fetch(`/api/teachers/courses/${tid}`)
+        .then(response => response.json())
+        .then(data => {
+          this.courses = data.choicess;
+          this.totalPages = data.total_pages;
+        })
+        .catch(error => {
+          console.error('Error fetching courses:', error);
+        });
+    },
     search() {
       this.issearch = true;
     },
@@ -124,30 +126,81 @@ Vue.component('teacher', {
       this.showAddModal = true;
     },
     saveCourse() {
-      this.courses.push({ ...this.newCourse });
-      this.showAddModal = false;
-      this.newCourse = {
-        id: '',
-        name: '',
-        teacher: '当前老师', // 替换为实际的老师名称
-        credits: '',
-        semester: '',
-        type: ''
-      };
+      fetch('/api/admin/courses', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          cid: this.newCourse.id,
+          cname: this.newCourse.name,
+          chour: this.newCourse.credits, // 假设学分对应学时
+        }),
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.message) {
+            alert('课程添加成功');
+            this.courses.push({ ...this.newCourse });
+            this.showAddModal = false;
+            this.newCourse = {
+              id: '',
+              name: '',
+              teacher: '当前老师', // 替换为实际的老师名称
+              credits: '',
+              semester: '',
+              type: ''
+            };
+          }
+        })
+        .catch(error => {
+          console.error('Error adding course:', error);
+        });
     },
     editCourse(course) {
-      // 实现编辑课程信息的逻辑
-      alert(`编辑 ${course.name} 的信息`);
+      fetch(`/api/admin/courses/${course.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          cname: course.name,
+          chour: course.credits, // 假设学分对应学时
+        }),
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.message) {
+            alert('课程信息更新成功');
+          }
+        })
+        .catch(error => {
+          console.error('Error updating course:', error);
+        });
     },
     deleteCourse(course) {
-      // 只能删除自己的课程
-      const index = this.courses.indexOf(course);
-      if (index !== -1 && course.teacher === '当前老师') { // 替换为实际的老师名称
-        this.courses.splice(index, 1);
+      if (course.teacher === '当前老师') { // 替换为实际的老师名称
+        fetch(`/api/admin/courses/${course.id}`, {
+          method: 'DELETE',
+        })
+          .then(response => response.json())
+          .then(data => {
+            if (data.message) {
+              alert('课程删除成功');
+              const index = this.courses.indexOf(course);
+              if (index !== -1) {
+                this.courses.splice(index, 1);
+              }
+            }
+          })
+          .catch(error => {
+            console.error('Error deleting course:', error);
+          });
+      } else {
+        alert("不能删除别人的课程");
       }
     },
     logout() {
-      // 实现退出系统的逻辑
       alert('退出系统');
     },
     prevPage() {
@@ -166,5 +219,8 @@ Vue.component('teacher', {
     cannotEdit() {
       alert("不能修改或删除别人的课程");
     }
+  },
+  mounted() {
+    this.fetchCourses();
   }
 });

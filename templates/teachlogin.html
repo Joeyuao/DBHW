@@ -36,14 +36,11 @@
             position: relative;
             font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
             color: rgb(21, 123, 212);
-            /* top: 70%; */
-            /* left: 50%; */
-            /* transform: translate(-50%, -0%); */
             display: inline;
             font-size: 40px;
         }
         main {
-            background-image: url('img/background.png'); /* 替换为你的背景图片路径 */
+            background-image: url('/static/img/background.png'); /* 替换为你的背景图片路径 */
             background-size: cover;
             background-position: center;
             height: 100vh;
@@ -61,7 +58,7 @@
             color: #fff;
             margin-top: 0;
         }
-        .login-box button {
+      .login-box button {
             background-color: #007BFF;
             color: #fff;
             border: none;
@@ -69,44 +66,64 @@
             border-radius: 5px;
             cursor: pointer;
             font-size: 16px;
-            width: 150px; /* 设置一个固定的宽度值 */
         }
-
       .login-box p {
             color: #fff;
         }
         .text-center {
             text-align: center;
         }
+        .login-box label{
+            color: #fff;
+        }
+        .login-box input {
+            color: #0073ff;
+            background-color: #e9e4e4;
+            height: 23px;
+        }
     </style>
+    <script>
+        document.querySelector('form').addEventListener('submit', async function(event) {
+            event.preventDefault(); // 阻止表单的默认提交行为
+
+            const formData = new FormData(this);
+            const response = await fetch('/', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (result.redirect) {
+                window.location.href = result.redirect; // 重定向到指定页面
+            } else if (result.error) {
+                alert(result.error); // 显示错误信息
+            }
+        });
+    </script>
 </head>
 <body>
     <header>
-        <img src="img/logo.png" alt="中山大学标志"><br>
-        
+        <img src="/static/img/logo.png" alt="中山大学标志"><br>
     </header>
     <div class="center-flex">
-    <div>
-        <h1 class="text-center">大学生选课系统</h1>
+        <div>
+            <h1 class="text-center">大学生选课系统</h1>
+        </div>
     </div>
-  </div>
     <main>
         <div class="login-box">
-            <h2>用户登录</h2>
-            <script>
-                function Stulogin() {
-                    window.location.href = "stulogin.html";
-                }
-                function Teachlogin() {
-                    window.location.href = "teachlogin.html";
-                }
-                function Adminlogin() {
-                    window.location.href = "Adminlogin.html";
-                }
-            </script>
-            <button onclick="Stulogin()">学生登录</button><br><br>
-            <button onclick="Teachlogin()">教师登录</button><br><br>
-            <button onclick="Adminlogin()">管理员登录</button>
+            <h2>教师登录</h2>
+            <form class="info" action="/" method="POST">
+                <input type="hidden" name="role" value="teacher"> <!-- 添加隐藏字段，确保角色为teacher -->
+                <label for="TeacherID">工号：</label>
+                <input name="TeacherID" placeholder="请输入教师工号"><br><br>
+
+                <label for="password">密码：</label>
+                <input type="password" name="password" placeholder="请输入密码">
+            </form>
+            <br>
+            <button type="submit">登录</button>
             <p>用户单位：大山中学</p>
         </div>
     </main>
