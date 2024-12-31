@@ -268,6 +268,7 @@ def get_students():
     return jsonify(students)
 
 ## 管理员管理老师部分
+
 # 获取教师列表（分页查询）
 @app.route('/api/admin/teachers', methods=['GET'])
 def get_teachers():
@@ -276,17 +277,17 @@ def get_teachers():
 
     offset = (page - 1) * per_page  # 分页偏移量
 
-    conn = get_connection()
+    #conn = get_connection()
     cursor = conn.cursor(dictionary=True)
 
     cursor.execute("""
-        SELECT * FROM teacher LIMIT %s OFFSET %s
+        SELECT * FROM teachers LIMIT %s OFFSET %s
     """, (per_page, offset))
 
     teachers = cursor.fetchall()
 
     cursor.execute("""
-        SELECT COUNT(*) FROM teacher
+        SELECT COUNT(*) FROM teachers
     """)
     
     total_teachers = cursor.fetchone()['count']
@@ -301,25 +302,20 @@ def get_teachers():
     })
 
 # 添加教师
-@app.route('/api/admin/teacher', methods=['POST'])
+@app.route('/api/admin/teachers', methods=['POST'])
 def add_teacher():
     data = request.get_json()
-    teacher_id = data.get('id')
-    name = data.get('name')
-    gender = data.get('gender')
-    birth_year = data.get('birthYear')
-    education = data.get('education')
-    title = data.get('title')
-    hire_year = data.get('hireYear')
-    department = data.get('department')
-
-    conn = get_connection()
+    tid = data.get('tid')
+    tname = data.get('tname')
+    email = data.get('email')
+    salary = data.get('salary')
+    #conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute("""
-        INSERT INTO teacher (teacher_id, name, gender, birth_year, education, title, hire_year, department)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-    """, (teacher_id, name, gender, birth_year, education, title, hire_year, department))
+        INSERT INTO teachers (tid, tname, email, salary)
+        VALUES (%s, %s, %s, %s, )
+    """, (tid, tname, email, salary))
 
     conn.commit()
     conn.close()
@@ -327,25 +323,22 @@ def add_teacher():
     return jsonify({"message": "教师添加成功"})
 
 # 编辑教师信息
-@app.route('/api/admin/teacher/<int:teacher_id>', methods=['PUT'])
-def edit_teacher(teacher_id):
+@app.route('/api/admin/teachers/<int:tid>', methods=['PUT'])
+def edit_teacher(tid):
     data = request.get_json()
-    name = data.get('name')
-    gender = data.get('gender')
-    birth_year = data.get('birthYear')
-    education = data.get('education')
-    title = data.get('title')
-    hire_year = data.get('hireYear')
-    department = data.get('department')
+    tid = data.get('tid')
+    tname = data.get('tname')
+    email = data.get('email')
+    salary = data.get('salary')
 
-    conn = get_connection()
+    #conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute("""
-        UPDATE teacher
-        SET name = %s, gender = %s, birth_year = %s, education = %s, title = %s, hire_year = %s, department = %s
-        WHERE teacher_id = %s
-    """, (name, gender, birth_year, education, title, hire_year, department, teacher_id))
+        UPDATE teachers
+        SET tname = %s, email = %s, salary = %s
+        WHERE tid = %s
+    """, (tname, email, salary, tid))
 
     conn.commit()
     conn.close()
@@ -353,20 +346,21 @@ def edit_teacher(teacher_id):
     return jsonify({"message": "教师信息更新成功"})
 
 # 删除教师
-@app.route('/api/admin/teacher/<int:teacher_id>', methods=['DELETE'])
-def delete_teacher(teacher_id):
-    conn = get_connection()
+@app.route('/api/admin/teachers/<int:tid>', methods=['DELETE'])
+def delete_teacher(tid):
+    #conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute("""
-        DELETE FROM teacher WHERE teacher_id = %s
-    """, (teacher_id,))
+        DELETE FROM teachers WHERE tid = %s
+    """, (tid,))
 
     conn.commit()
     conn.close()
 
     return jsonify({"message": "教师删除成功"})
 
+'''
 # 重置教师密码
 @app.route('/api/admin/teacher/reset_password/<int:teacher_id>', methods=['POST'])
 def reset_password(teacher_id):
@@ -400,28 +394,28 @@ def reset_all_passwords():
     conn.close()
 
     return jsonify({"message": "所有教师密码已重置"})
-
+'''
 
 ## 学生选课部分
 # 获取课程列表（分页查询）
-@app.route('/api/student/courses', methods=['GET'])
+@app.route('/api/students/courses', methods=['GET'])
 def get_courses():
     page = int(request.args.get('page', 1))  # 页码
     per_page = int(request.args.get('per_page', 10))  # 每页显示多少课程
 
     offset = (page - 1) * per_page  # 分页偏移量
 
-    conn = get_connection()
+    #conn = get_connection()
     cursor = conn.cursor(dictionary=True)
 
     cursor.execute("""
-        SELECT * FROM course LIMIT %s OFFSET %s
+        SELECT * FROM courses LIMIT %s OFFSET %s
     """, (per_page, offset))
 
     courses = cursor.fetchall()
 
     cursor.execute("""
-        SELECT COUNT(*) FROM course
+        SELECT COUNT(*) FROM courses
     """)
     
     total_courses = cursor.fetchone()['count']
@@ -436,29 +430,12 @@ def get_courses():
     })
 
 # 学生选课
-@app.route('/api/student/select_course', methods=['POST'])
+@app.route('/api/students/select_course', methods=['POST'])
 def select_course():
     data = request.get_json()
     course_id = data.get('course_id')
     student_id = data.get('student_id')
 
-    # 检查课程是否已满
-    conn = get_connection()
-    cursor = conn.cursor()
-
-    cursor.execute("""
-        SELECT * FROM course WHERE course_id = %s
-    """, (course_id,))
-
-    course = cursor.fetchone()
-
-    if not course:
-        conn.close()
-        return jsonify({"error": "课程不存在"}), 404
-
-    if course['nownumber'] >= course['limit']:
-        conn.close()
-        return jsonify({"error": "课程人数已满，无法选课"}), 400
 
     # 检查学生是否已经选了这门课
     cursor.execute("""
