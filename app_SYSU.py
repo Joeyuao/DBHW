@@ -1,48 +1,67 @@
-from flask import Flask, render_template, request, redirect, url_for, jsonify, send_from_directory
+from flask import Flask, render_template,session ,request, redirect, url_for, jsonify, send_from_directory
 from dev import conn
 
 
 app = Flask(__name__)
+app.secret_key = 'your_secret_key'  # 用于 session 管理
 
-@app.route('/', methods=['GET', 'POST'])
-def index():
+# 模拟的用户数据
+users = {
+    "teacher": {"username": "t1", "password": "t123", "role": "teacher", "courses": []},
+    "student": {"username": "s1", "password": "s123", "role": "student", "courses": []},
+    "admin": {"username": "a1", "password": "a123", "role": "admin"}
+}
+
+# 模拟的课程数据
+courses = {
+    "course1": {"name": "Mathematics", "teacher": "t1"},
+    "course2": {"name": "Physics", "teacher": "t1"},
+    "course3": {"name": "Chemistry", "teacher": "t2"}
+}
+
+@app.route('/', methods=['POST', 'GET'])
+def home():
     if request.method == 'POST':
-        user_role = request.form.get('role')
-        password = request.form.get('password')
-        print(user_role, password)
-        if user_role == 'student':
-            if password == '123456':
-                return jsonify({'redirect': url_for('/stulogin')}) # 对应的前端
-            else:
-                return jsonify({'error': '学生密码错误！'}), 400
-        elif user_role == 'admin':
-            if password == '123456':
-                return jsonify({'redirect': url_for('/Adminlogin')}) # 对应的前端
-            else:
-                return jsonify({'error': '管理员密码错误！'}), 400
-        elif user_role == 'teacher':
-            if password == '123456':
-                return jsonify({'redirect': url_for('/teachlogin')}) # 对应的前端
-            else:
-                return jsonify({'error': '教师密码错误！'}), 400
+        username = request.form['username']
+        password = request.form['password']
+        role = request.form['role']
 
-    return render_template('index.html')
+        # 检查用户名、密码和角色
+        if role in users and users[role]["username"] == username and users[role]["password"] == password:
+            session['username'] = username
+            session['role'] = role
+            if role == "teacher":
+                return redirect(url_for('teacher_dashboard'))
+            elif role == "student":
+                return redirect(url_for('student_dashboard'))
+            elif role == "admin":
+                return redirect(url_for('admin_dashboard'))
+        else:
+            return "登录失败，请检查用户名、密码和角色"
+    return render_template('login.html')
+# @app.route('/', methods=['GET', 'POST'])
+# def index():
+#     if request.method == 'POST':
+#         user_role = request.form.get('role')
+#         password = request.form.get('password')
+#         print(user_role, password)
+#         if user_role == 'student':
+#             if password == '123456':
+#                 return jsonify({'redirect': url_for('/stulogin')}) # 对应的前端
+#             else:
+#                 return jsonify({'error': '学生密码错误！'}), 400
+#         elif user_role == 'admin':
+#             if password == '123456':
+#                 return jsonify({'redirect': url_for('/Adminlogin')}) # 对应的前端
+#             else:
+#                 return jsonify({'error': '管理员密码错误！'}), 400
+#         elif user_role == 'teacher':
+#             if password == '123456':
+#                 return jsonify({'redirect': url_for('/teachlogin')}) # 对应的前端
+#             else:
+#                 return jsonify({'error': '教师密码错误！'}), 400
 
-# 学生登录页面
-@app.route('/stulogin', methods=['GET'])
-def stulogin():
-    return render_template('stulogin.html')
-
-# 教师登录页面
-@app.route('/teachlogin', methods=['GET'])
-def teachlogin():
-    return render_template('teach.html')
-
-# 管理员登录页面
-@app.route('/Adminlogin', methods=['GET'])
-def adminlogin():
-    return render_template('Adminlogin.html')
-
+#     return render_template('index.html')
 # 学生面板路由
 @app.route('/studentPage', methods=['GET'])
 def student_dashboard():
