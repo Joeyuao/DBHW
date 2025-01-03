@@ -88,7 +88,7 @@
                     <form action="{{ url_for('update_teacher') }}" method="POST" style="display:inline;">
                         <input type="hidden" name="tid" value="{{ teacher['tid'] }}">
                         <input type="text" name="tname" placeholder="新姓名" required>
-                        <input type="email" name="salary" placeholder="新薪资" required>
+                        <input type="text" name="salary" placeholder="新薪资" required>
                         <button type="submit">更新</button>
                     </form>
                 </td>
