@@ -15,9 +15,9 @@ users = {
 def get_connection():
     """获取 PostgreSQL 数据库连接"""
     return psycopg2.connect(
-        dbname="school",
+        dbname="local_1",
         user="postgres",
-        password="lyq20040510",
+        password="20040417",
         host="localhost",
         port="5432"
     )
@@ -205,7 +205,24 @@ def drop_course():
 
 @app.route('/admin_dashboard')
 def admin_dashboard():
-    return "管理员仪表盘"
+    if 'username' not in session or session['role'] != 'admin':
+        return redirect(url_for('home'))  # 如果未登录或不是管理员，重定向到登录页
+
+    username = session['username']
+    conn = get_connection()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+
+    # 查询全部选课信息
+    cur.execute("""
+        SELECT * from choices;
+    """)
+    choices = cur.fetchall()
+
+    cur.close()
+    conn.close()
+
+    # 将选课信息传递给模板
+    return render_template('admin_dashboard.html', choices = choices)
 
 if __name__ == '__main__':
     app.run(debug=True)
