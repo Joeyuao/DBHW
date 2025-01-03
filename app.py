@@ -63,7 +63,9 @@ def home():
                 flash("登录失败，请检查用户名、密码和角色")
         elif role == "admin":
             # cur.execute("SELECT * FROM teachers WHERE id = %s", (id,))
-            if users[role]["password_hash"] == password_hash:
+            cur.execute("SELECT * FROM administrators WHERE aid = %s", (id,))
+            admin=cur.fetchone()
+            if admin and admin['passwordhash'] == password_hash:
                 session['id'] = id
                 session['role'] = role
                 return redirect(url_for('admin_dashboard'))
@@ -326,7 +328,8 @@ def admin_dashboard():
 
 @app.route('/manage_choices')
 def manage_choices():
-    if 'username' not in session or session['role'] != 'admin':
+    if 'id' not in session or session['role'] != 'admin':
+        print("not admin")
         return redirect(url_for('home'))  # 未登录或非管理员重定向
 
     conn = get_connection()
@@ -370,12 +373,12 @@ def delete_choice(cid):
     cursor.execute("DELETE FROM choices WHERE cid = %s", (cid,))
     conn.commit()
     conn.close()    
-    return redirect(url_for('home'))
+    return redirect(url_for('manage_choices'))
 
 # 管理学生
 @app.route('/students')
 def manage_students():
-    if 'username' not in session or session['role'] != 'admin':
+    if 'id' not in session or session['role'] != 'admin':
         return redirect(url_for('home'))  # 未登录或非管理员重定向
 
     conn = get_connection()
@@ -436,7 +439,7 @@ def update_student():
 @app.route('/teachers')
 def manage_teachers():
     
-    if 'username' not in session or session['role'] != 'admin':
+    if 'id' not in session or session['role'] != 'admin':
         return redirect(url_for('home'))  # 未登录或非管理员重定向
 
     conn = get_connection()
