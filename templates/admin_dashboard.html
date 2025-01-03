@@ -7,120 +7,43 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            display: flex;
             margin: 0;
+            padding: 0;
+        }
+        .sidebar {
+            width: 200px;
+            background-color: #333;
+            color: white;
+            height: 100vh;
             padding: 20px;
         }
-        h1 {
-            color: #333;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        th, td {
-            padding: 10px;
-            text-align: left;
-            border: 1px solid #ddd;
-        }
-        th {
-            background-color: #f8f8f8;
-        }
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-        tr:hover {
-            background-color: #f1f1f1;
-        }
-        a {
-            display: inline-block;
-            margin-top: 20px;
-            color: #007bff;
-            text-decoration: none;
-        }
-        a:hover {
-            text-decoration: underline;
-        }
-        .score-input {
-            width: 60px;
-            padding: 5px;
-        }
-        .update-button {
-            padding: 5px 10px;
-            background-color: #007bff;
+        .sidebar a {
             color: white;
-            border: none;
-            border-radius: 3px;
-            cursor: pointer;
+            text-decoration: none;
+            display: block;
+            margin: 10px 0;
         }
-        .update-button:hover {
-            background-color: #0056b3;
+        .sidebar a:hover {
+            background-color: #575757;
+            padding-left: 10px;
         }
-        .add-form {
-            margin-top: 20px;
-            padding: 10px;
-            background-color: #f8f8f8;
-            border-radius: 5px;
-        }
-        .add-button-container {
-            margin-bottom: 20px;
+        .content {
+            flex-grow: 1;
+            padding: 20px;
         }
     </style>
 </head>
 <body>
-    <h1>管理员仪表盘</h1>
-    <p>欢迎, {{ session['username'] }}!</p>
-
-    <!-- 添加选课按钮和表单 -->
-    <div class="add-button-container">
-        <h3>添加选课信息</h3>
-        <form action="{{ url_for('add_choice') }}" method="POST" class="add-form">
-            <label for="sid">学生 ID:</label>
-            <input type="text" name="sid" required><br>
-
-            <label for="tid">教师 ID:</label>
-            <input type="text" name="tid" required><br>
-
-            <label for="cid">课程 ID:</label>
-            <input type="text" name="cid" required><br>
-
-            <label for="score">成绩:</label>
-            <input type="number" name="score" min="0" max="100" required><br>
-
-            <button type="submit" class="update-button">添加选课</button>
-        </form>
+    <div class="sidebar">
+        <h2>管理选项</h2>
+        <a href="{{ url_for('manage_choices') }}">管理选课</a>
+        <a href="{{ url_for('manage_students') }}">管理学生</a>
+        <a href="{{ url_for('manage_teachers') }}">管理老师</a>
     </div>
-
-    <!-- 显示所有选课信息 -->
-    <h2>所有选课信息</h2>
-    <table border="1">
-        <thead>
-            <tr>
-                <th>编号</th>
-                <th>学生 ID</th>
-                <th>教师 ID</th>
-                <th>课程 ID</th>
-                <th>成绩</th>
-                <th>操作</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for choice in choices %}
-            <tr>
-                <td>{{ choice.id }}</td>
-                <td>{{ choice.sid }}</td>
-                <td>{{ choice.tid }}</td>
-                <td>{{ choice.cid }}</td>
-                <td>{{ choice.score }}</td>
-                <td>
-                    <a href="{{ url_for('delete_choice', cid=choice.cid) }}" class="update-button">删除</a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-    <a href="{{ url_for('home') }}">退出</a>
+    <div class="content">
+        <h1>欢迎管理员!</h1>
+        <p>请选择管理选课、学生或教师的选项。</p>
+    </div>
 </body>
 </html>

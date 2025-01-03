@@ -314,24 +314,38 @@ def admin_dashboard():
     if 'id' not in session or session['role'] != 'admin':
         return redirect(url_for('home'))  # 如果未登录或不是管理员，重定向到登录页
 
-    id = session['id']
     conn = get_connection()
     cur = conn.cursor(cursor_factory=RealDictCursor)
 
-    # 查询全部选课信息
-    cur.execute("""
-        SELECT * FROM choices LIMIT 10;
-    """)
-    choices = cur.fetchall()
 
     cur.close()
     conn.close()
 
     # 将选课信息传递给模板
-    return render_template('admin_dashboard.html', choices = choices)
+    return render_template('admin_dashboard.html')
+
+@app.route('/manage_choices')
+def manage_choices():
+    if 'username' not in session or session['role'] != 'admin':
+        return redirect(url_for('home'))  # 未登录或非管理员重定向
+
+    conn = get_connection()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    
+    # 查询选课信息
+    cur.execute("SELECT * FROM choices LIMIT 100")
+    choices = cur.fetchall()
+
+    cur.close()
+    conn.close()
+
+    # 渲染 manage_choices 页面
+    return render_template('manage_choices.html', choices=choices)
+
 
 @app.route('/add_choice', methods=['POST'])
 def add_choice():
+    no = request.form['no']
     sid = request.form['sid']
     tid = request.form['tid']
     cid = request.form['cid']
@@ -340,8 +354,8 @@ def add_choice():
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute(
-        "INSERT INTO choices (sid, tid, cid, score) VALUES (?, ?, ?, ?)", 
-        (sid, tid, cid, score)
+        "INSERT INTO choices (no, sid, tid, cid, score) VALUES (%s, %s, %s, %s, %s)", 
+        (no, sid, tid, cid, score)
     )
     conn.commit()  
     conn.close()
@@ -349,15 +363,125 @@ def add_choice():
     return redirect(url_for('home'))
 
 
-@app.route('/delete_choice/<int:cid>', methods=['GET'])
+@app.route('/delete_choice/<cid>', methods=['GET'])
 def delete_choice(cid):
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("DELETE FROM choices WHERE cid = ?", (cid,))
+    cursor.execute("DELETE FROM choices WHERE cid = %s", (cid,))
+    conn.commit()
+    conn.close()    
+    return redirect(url_for('home'))
+
+# 管理学生
+@app.route('/students')
+def manage_students():
+    if 'username' not in session or session['role'] != 'admin':
+        return redirect(url_for('home'))  # 未登录或非管理员重定向
+
+    conn = get_connection()
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+   
+    #cursor = conn.cursor()
+    
+    cursor.execute("SELECT * FROM students limit 1000")
+    students = cursor.fetchall()
+    conn.close()
+    return render_template('manage_students.html', students = students)
+
+@app.route('/add_student', methods=['POST'])
+def add_student():
+    sid = request.form['sid']
+    sname = request.form['sname']
+    email = request.form['email']
+    grade = request.form['grade']
+    dep = request.form['dep']
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO students (sid, sname, email, grade, dep) VALUES (%s, %s, %s, %s, %s)",
+        (sid, sname, email, grade, dep)
+    )
     conn.commit()
     conn.close()
+    return redirect(url_for('manage_students'))
+
+@app.route('/delete_student/<sid>')
+def delete_student(sid):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM choices WHERE sid = %s", (sid,))
+    cursor.execute("DELETE FROM students WHERE sid = %s", (sid,))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('manage_students'))
+
+@app.route('/update_student', methods=['POST'])
+def update_student():
+    sid = request.form['sid']
+    sname = request.form['sname']
+    email = request.form['email']
+    grade = request.form['grade']
+    dep = request.form['dep']
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "UPDATE students SET sname = %s, email = %s, grade = %s, dep = %s WHERE sid = %s",
+        (sname, email, grade, dep, sid)
+    )
+    conn.commit()
+    conn.close()
+    return redirect(url_for('manage_students'))
+
+# 管理教师
+@app.route('/teachers')
+def manage_teachers():
     
-    return redirect(url_for('home'))
+    if 'username' not in session or session['role'] != 'admin':
+        return redirect(url_for('home'))  # 未登录或非管理员重定向
+
+    conn = get_connection()
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+
+    cursor.execute("SELECT * FROM teachers limit 100")
+    teachers = cursor.fetchall()
+    conn.close()
+    return render_template('manage_teachers.html', teachers=teachers)
+
+@app.route('/add_teacher', methods=['POST'])
+def add_teacher():
+    tid = request.form['tid']
+    tname = request.form['tname']
+    salary = request.form['salary']
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO teachers (tid, tname, salary) VALUES (%s, %s, %s)", (tid, tname, salary))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('manage_teachers'))
+
+@app.route('/delete_teacher/<tid>')
+def delete_teacher(tid):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM teachers WHERE tid = %s", (tid,))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('manage_teachers'))
+
+@app.route('/update_teacher', methods=['POST'])
+def update_teacher():
+    tid = request.form['tid']
+    tname = request.form['tname']
+    salary = request.form['salary']
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "UPDATE teachers SET tname = %s, salary = %s WHERE tid = %s",
+        (tname, salary, tid)
+    )
+    conn.commit()
+    conn.close()
+    return redirect(url_for('manage_teachers'))
 
 if __name__ == '__main__':
     app.run(debug=True)
