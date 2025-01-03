@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>选课管理</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #f8f8f8;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+        .form-container {
+            margin-bottom: 20px;
+        }
+        input, button {
+            padding: 10px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>选课管理</h1>
+
+    <div class="form-container">
+        <form action="{{ url_for('add_choice') }}" method="POST">
+            <input type="text" name="no" placeholder="序号" required>
+            <input type="text" name="sid" placeholder="学生 ID" required>
+            <input type="text" name="tid" placeholder="教师 ID" required>
+            <input type="text" name="cid" placeholder="课程 ID" required>
+            <input type="number" name="score" placeholder="成绩" min="0" max="100">
+            <button type="submit">添加选课</button>
+        </form>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>课程编号</th>
+                <th>学生 ID</th>
+                <th>教师 ID</th>
+                <th>成绩</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for choice in choices %}
+            <tr>
+                <td>{{ choice['no'] }}</td>
+                <td>{{ choice['cid'] }}</td>
+                <td>{{ choice['sid'] }}</td>
+                <td>{{ choice['tid'] }}</td>
+                <td>{{ choice['score'] }}</td>
+                <td>
+                    <form action="{{ url_for('delete_choice', cid=choice['cid']) }}" method="GET" style="display:inline;">
+                        <button type="submit">删除</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学生管理</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #f8f8f8;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+        .form-container {
+            margin-bottom: 20px;
+        }
+        input, button {
+            padding: 10px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>老师管理</h1>
+
+    <!-- 添加学生表单 -->
+    <div class="form-container">
+        <form action="{{ url_for('add_teacher') }}" method="POST">
+            <input type="text" name="tid" placeholder="老师ID" required>
+            <input type="text" name="tname" placeholder="老师姓名" required>
+            <input type="text" name="salary" placeholder="薪资" required>
+            <button type="submit">添加老师</button>
+        </form>
+    </div>
+
+    <!-- 老师信息表格 -->
+    <table>
+        <thead>
+            <tr>
+                <th>老师ID</th>
+                <th>老师姓名</th>
+                <th>薪资</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for teacher in teachers %}
+            <tr>
+                <td>{{ teacher['tid'] }}</td>
+                <td>{{ teacher['tname'] }}</td>
+                <td>{{ teacher['salary'] }}</td>
+                <td>
+                    <form action="{{ url_for('delete_teacher', tid=teacher['tid']) }}" method="GET" style="display:inline;">
+                        <button type="submit">删除</button>
+                    </form>
+                    <form action="{{ url_for('update_teacher') }}" method="POST" style="display:inline;">
+                        <input type="hidden" name="tid" value="{{ teacher['tid'] }}">
+                        <input type="text" name="tname" placeholder="新姓名" required>
+                        <input type="email" name="salary" placeholder="新薪资" required>
+                        <button type="submit">更新</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
