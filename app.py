@@ -224,6 +224,35 @@ def admin_dashboard():
     # 将选课信息传递给模板
     return render_template('admin_dashboard.html', choices = choices)
 
+@app.route('/add_choice', methods=['POST'])
+def add_choice():
+    sid = request.form['sid']
+    tid = request.form['tid']
+    cid = request.form['cid']
+    score = request.form['score']
+    
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO choices (sid, tid, cid, score) VALUES (?, ?, ?, ?)", 
+        (sid, tid, cid, score)
+    )
+    conn.commit()  
+    conn.close()
+    
+    return redirect(url_for('home'))
+
+
+@app.route('/delete_choice/<int:cid>', methods=['GET'])
+def delete_choice(cid):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM choices WHERE cid = ?", (cid,))
+    conn.commit()
+    conn.close()
+    
+    return redirect(url_for('home'))
+
 if __name__ == '__main__':
     app.run(debug=True)
 """
