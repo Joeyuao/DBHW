@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>教师仪表盘</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #f8f8f8;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+        a {
+            display: inline-block;
+            margin-top: 20px;
+            color: #007bff;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .score-input {
+            width: 60px;
+            padding: 5px;
+        }
+        .update-button {
+            padding: 5px 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .update-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>教师仪表盘</h1>
+    <p>欢迎, {{ session['username'] }}!</p>
+
+    <h2>您的课程及学生成绩</h2>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>学生 ID</th>
+                <th>学生姓名</th>
+                <th>课程 ID</th>
+                <th>课程名称</th>
+                <th>成绩</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for course in courses %}
+            <tr>
+                <td>{{ course.sid }}</td>
+                <td>{{ course.sname }}</td>
+                <td>{{ course.cid }}</td>
+                <td>{{ course.cname }}</td>
+                <td>
+                    <form action="{{ url_for('update_score') }}" method="POST" style="display:inline;">
+                        <input type="hidden" name="sid" value="{{ course.sid }}">
+                        <input type="hidden" name="cid" value="{{ course.cid }}">
+                        <input type="number" name="score" value="{{ course.score }}" class="score-input" min="0" max="100" required>
+                        <button type="submit" class="update-button">更新</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ url_for('home') }}">退出</a>
+</body>
+</html>

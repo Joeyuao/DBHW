@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学生仪表盘</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #f8f8f8;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+        a {
+            display: inline-block;
+            margin-top: 20px;
+            color: #007bff;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .action-button {
+            padding: 5px 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .action-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>学生仪表盘</h1>
+    <p>欢迎, {{ session['username'] }}!</p>
+
+    <h2>已选课程</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>课程 ID</th>
+                <th>课程名称</th>
+                <th>课时</th>
+                <th>成绩</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for course in enrolled_courses %}
+            <tr>
+                <td>{{ course.cid }}</td>
+                <td>{{ course.cname }}</td>
+                <td>{{ course.hour }}</td>
+                <td>{{ course.score }}</td>
+                <td>
+                    <form action="{{ url_for('drop_course') }}" method="POST" style="display:inline;">
+                        <input type="hidden" name="sid" value="{{ session['username'] }}">
+                        <input type="hidden" name="cid" value="{{ course.cid }}">
+                        <button type="submit" class="action-button">退课</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2>所有课程</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>课程 ID</th>
+                <th>课程名称</th>
+                <th>课时</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for course in all_courses %}
+            <tr>
+                <td>{{ course.cid }}</td>
+                <td>{{ course.cname }}</td>
+                <td>{{ course.hour }}</td>
+                <td>
+                    <form action="{{ url_for('enroll_course') }}" method="POST" style="display:inline;">
+                        <input type="hidden" name="sid" value="{{ session['username'] }}">
+                        <input>
+                        <input type="hidden" name="cid" value="{{ course.cid }}">
+                        <button type="submit" class="action-button">选课</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ url_for('home') }}">退出</a>
+</body>
+</html>
