@@ -8,7 +8,7 @@ app.secret_key = 'your_secret_key'  # 用于 session 管理
 # 模拟的用户数据
 users = {
     "teacher": {"username": "t1", "password": "t123", "role": "teacher", "courses": []},
-    "student": {"username": "s1", "password": "s123", "role": "student", "courses": []},
+    "student": {"username": "867650681", "password": "s123", "role": "student", "courses": []},#s1
     "admin": {"username": "a1", "password": "a123", "role": "admin"}
 }
 
@@ -21,7 +21,10 @@ def get_connection():
         host="localhost",
         port="5432"
     )
-
+conn = get_connection()
+cur = conn.cursor(cursor_factory=RealDictCursor)
+cur.execute("select max(no) from choices;")
+no=cur.fetchone()['max']+1
 @app.route('/', methods=['POST', 'GET'])
 def home():
     if request.method == 'POST':
@@ -110,12 +113,24 @@ def student_dashboard():
         FROM students
         JOIN choices ON students.sid = choices.sid
         JOIN courses ON choices.cid = courses.cid
-        WHERE students.sname = %s;
+        WHERE students.sid = %s;
     """, (username,))
     enrolled_courses = cur.fetchall()
 
-    # 查询所有课程
-    cur.execute("SELECT * FROM courses")
+    # # 查询所有课程+老师 fuck,老师太多了，不好展示
+    cur.execute("""
+    WITH ranked_courses AS (
+        SELECT
+            courses.cid, courses.cname, courses.hour, courses.leastgrade, teachers.tname,teachers.tid,
+            ROW_NUMBER() OVER (PARTITION BY courses.cname ORDER BY RANDOM()) AS rn
+        FROM courses
+        LEFT JOIN choices ON courses.cid = choices.cid
+        LEFT JOIN teachers ON choices.tid = teachers.tid
+    )
+    SELECT cid, cname, hour, leastgrade, tname,tid
+    FROM ranked_courses
+    WHERE rn = 1;
+    """)
     all_courses = cur.fetchall()
 
     cur.close()
@@ -126,12 +141,16 @@ def student_dashboard():
 
 @app.route('/enroll_course', methods=['POST'])
 def enroll_course():
+    global no
     if 'username' not in session or session['role'] != 'student':
         return redirect(url_for('home'))  # 如果未登录或不是学生，重定向到登录页
 
     sid = request.form['sid']
     cid = request.form['cid']
-
+    tid = request.form['tid']
+    leastgrade = request.form['leastgrade']
+    # 学生年级
+    # student_grade = request.form['leastgrade']
     conn = get_connection()
     cur = conn.cursor()
 
@@ -140,10 +159,25 @@ def enroll_course():
     if cur.fetchone():
         flash('您已经选过该课程！', 'error')
     else:
+        cur.execute("SELECT * FROM students WHERE sid = %s", (sid,))
+        grade = cur.fetchone()  # 获取查询结果的第一行
+        print("Grade:", grade)
+        grade_value = 0
+        if grade:
+            grade_value = grade[3]  # 提取 leastgrade 字段的值
+            print("Grade:", grade_value)
+        else:
+            print("No grade found for sid:", sid)
         # 插入选课记录
-        cur.execute("INSERT INTO choices (sid, cid, score) VALUES (%s, %s, %s)", (sid, cid, 0))
-        conn.commit()
-        flash('选课成功！', 'success')
+        print("leastgrade",leastgrade,"grade_value",grade_value)
+        if int(leastgrade) > int(grade_value):
+            flash('您的年级不足以选该课程！', 'error')
+        else:
+            print("sid",sid,"tid",tid,"cid",cid)
+            cur.execute("INSERT INTO choices (no,sid, tid, cid, score) VALUES (%s,%s, %s, %s, %s)", (no,sid, tid, cid, 0))
+            no=no+1
+            conn.commit()
+            flash('选课成功！', 'success')
 
     cur.close()
     conn.close()
@@ -175,3 +209,17 @@ def admin_dashboard():
 
 if __name__ == '__main__':
     app.run(debug=True)
+"""
+select courses.cid, courses.cname, courses.hour,courses.leastgrade,teachers.tname,teachers.tid
+from courses courses
+left join choices on courses.cid = choices.cid
+left join teachers on choices.tid = teachers.tid;
+"""
+# 老师可以改分数
+# 学生可以选课、退课
+
+
+#低于最低年级的学生不能选课
+#没实现的：
+# 加一个学分到课程表
+#密码哈希

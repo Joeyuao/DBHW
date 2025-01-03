@@ -53,11 +53,38 @@
         .action-button:hover {
             background-color: #0056b3;
         }
+        .flash-messages {
+            margin-bottom: 20px;
+        }
+        .flash-success {
+            color: green;
+            background-color: #e6ffe6;
+            padding: 10px;
+            border: 1px solid green;
+            border-radius: 5px;
+        }
+        .flash-error {
+            color: red;
+            background-color: #ffe6e6;
+            padding: 10px;
+            border: 1px solid red;
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body>
     <h1>学生仪表盘</h1>
     <p>欢迎, {{ session['username'] }}!</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="flash-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
 
     <h2>已选课程</h2>
     <table>
@@ -96,6 +123,9 @@
                 <th>课程 ID</th>
                 <th>课程名称</th>
                 <th>课时</th>
+                <th>最低年级要求</th>
+                <th>教师</th>
+                <th>教师 ID</th>
                 <th>操作</th>
             </tr>
         </thead>
@@ -105,11 +135,15 @@
                 <td>{{ course.cid }}</td>
                 <td>{{ course.cname }}</td>
                 <td>{{ course.hour }}</td>
+                <td>{{ course.leastgrade }}</td>
+                <td>{{ course.tname }}</td>
+                <td>{{ course.tid }}</td>
                 <td>
                     <form action="{{ url_for('enroll_course') }}" method="POST" style="display:inline;">
+                        <input type="hidden" name="leastgrade" value="{{ course.leastgrade }}">
                         <input type="hidden" name="sid" value="{{ session['username'] }}">
-                        <input>
                         <input type="hidden" name="cid" value="{{ course.cid }}">
+                        <input type="hidden" name="tid" value="{{ course.tid }}">
                         <button type="submit" class="action-button">选课</button>
                     </form>
                 </td>
