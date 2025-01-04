@@ -60,10 +60,10 @@ def home():
             if student and student['passwordhash'] == password_hash:
                 session['id'] = id
                 session['role'] = role
-                print("登录成功")
+                # print("登录成功")
                 return redirect(url_for('student_dashboard'))
             else:
-                flash("登录失败，请检查用户名、密码和角色")
+                flash("登录失败，请检查用户名、密码和角色",'error')
         elif role == "admin":
             # cur.execute("SELECT * FROM teachers WHERE id = %s", (id,))
             cur.execute("SELECT * FROM administrators WHERE aid = %s", (id,))

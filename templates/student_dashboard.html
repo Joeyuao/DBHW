@@ -4,28 +4,42 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>学生仪表盘</title>
+    
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
             margin: 0;
             padding: 20px;
+            color: #333;
         }
         h1 {
-            color: #333;
+            color: #2c3e50;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+        p {
+            font-size: 1.1rem;
+            color: #555;
         }
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
         }
         th, td {
-            padding: 10px;
+            padding: 12px 15px;
             text-align: left;
-            border: 1px solid #ddd;
+            border: 1px solid #e0e0e0;
         }
         th {
-            background-color: #f8f8f8;
+            background-color: #007bff;
+            color: white;
+            font-weight: 600;
         }
         tr:nth-child(even) {
             background-color: #f9f9f9;
@@ -38,17 +52,22 @@
             margin-top: 20px;
             color: #007bff;
             text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
         }
         a:hover {
+            color: #0056b3;
             text-decoration: underline;
         }
         .action-button {
-            padding: 5px 10px;
+            padding: 8px 16px;
             background-color: #007bff;
             color: white;
             border: none;
-            border-radius: 3px;
+            border-radius: 4px;
             cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
         }
         .action-button:hover {
             background-color: #0056b3;
@@ -57,101 +76,184 @@
             margin-bottom: 20px;
         }
         .flash-success {
-            color: green;
+            color: #28a745;
             background-color: #e6ffe6;
-            padding: 10px;
-            border: 1px solid green;
-            border-radius: 5px;
+            padding: 12px;
+            border: 1px solid #28a745;
+            border-radius: 4px;
+            font-size: 14px;
         }
         .flash-error {
-            color: red;
+            color: #dc3545;
             background-color: #ffe6e6;
+            padding: 12px;
+            border: 1px solid #dc3545;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        #searchInput {
+            width: 100%;
+            max-width: 400px;
             padding: 10px;
-            border: 1px solid red;
-            border-radius: 5px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        #searchInput:focus {
+            border-color: #007bff;
+            outline: none;
+            box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .section-title {
+            font-size: 1.8rem;
+            color: #2c3e50;
+            margin-top: 30px;
+            margin-bottom: 15px;
         }
     </style>
 </head>
 <body>
-    <h1>学生仪表盘</h1>
-    <p>欢迎, {{ session['username'] }}!</p>
+    <div class="container">
+        <h1>学生仪表盘</h1>
+        <p>欢迎, {{ session['username'] }}!</p><br>
+        <a href="{{ url_for('home') }}">退出登录</a><br>
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <div class="flash-messages">
-                {% for category, message in messages %}
-                    <div class="flash-{{ category }}">{{ message }}</div>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- 添加查询输入框 -->
+        <input type="text" id="searchInput" onkeyup="searchTable()" placeholder="搜索课程名称...">
+
+        <h2 class="section-title">已选课程</h2>
+        <table id="enrolledCoursesTable">
+            <thead>
+                <tr>
+                    <th>课程 ID</th>
+                    <th>课程名称</th>
+                    <th>课时</th>
+                    <th>成绩</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for course in enrolled_courses %}
+                <tr>
+                    <td>{{ course.cid }}</td>
+                    <td>{{ course.cname }}</td>
+                    <td>{{ course.hour }}</td>
+                    <td>{{ course.score }}</td>
+                    <td>
+                        <form action="{{ url_for('drop_course') }}" method="POST" style="display:inline;">
+                            <input type="hidden" name="sid" value="{{ session['username'] }}">
+                            <input type="hidden" name="cid" value="{{ course.cid }}">
+                            <button type="submit" class="action-button">退课</button>
+                        </form>
+                    </td>
+                </tr>
                 {% endfor %}
-            </div>
-        {% endif %}
-    {% endwith %}
+            </tbody>
+        </table>
 
-    <h2>已选课程</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>课程 ID</th>
-                <th>课程名称</th>
-                <th>课时</th>
-                <th>成绩</th>
-                <th>操作</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for course in enrolled_courses %}
-            <tr>
-                <td>{{ course.cid }}</td>
-                <td>{{ course.cname }}</td>
-                <td>{{ course.hour }}</td>
-                <td>{{ course.score }}</td>
-                <td>
-                    <form action="{{ url_for('drop_course') }}" method="POST" style="display:inline;">
-                        <input type="hidden" name="sid" value="{{ session['username'] }}">
-                        <input type="hidden" name="cid" value="{{ course.cid }}">
-                        <button type="submit" class="action-button">退课</button>
-                    </form>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+        <h2 class="section-title">所有课程</h2>
+        <table id="allCoursesTable">
+            <thead>
+                <tr>
+                    <th>课程 ID</th>
+                    <th>课程名称</th>
+                    <th>课时</th>
+                    <th>最低年级要求</th>
+                    <th>教师</th>
+                    <th>教师 ID</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for course in all_courses %}
+                <tr>
+                    <td>{{ course.cid }}</td>
+                    <td>{{ course.cname }}</td>
+                    <td>{{ course.hour }}</td>
+                    <td>{{ course.leastgrade }}</td>
+                    <td>{{ course.tname }}</td>
+                    <td>{{ course.tid }}</td>
+                    <td>
+                        <form action="{{ url_for('enroll_course') }}" method="POST" style="display:inline;">
+                            <input type="hidden" name="leastgrade" value="{{ course.leastgrade }}">
+                            <input type="hidden" name="sid" value="{{ session['username'] }}">
+                            <input type="hidden" name="cid" value="{{ course.cid }}">
+                            <input type="hidden" name="tid" value="{{ course.tid }}">
+                            <button type="submit" class="action-button">选课</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
 
-    <h2>所有课程</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>课程 ID</th>
-                <th>课程名称</th>
-                <th>课时</th>
-                <th>最低年级要求</th>
-                <th>教师</th>
-                <th>教师 ID</th>
-                <th>操作</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for course in all_courses %}
-            <tr>
-                <td>{{ course.cid }}</td>
-                <td>{{ course.cname }}</td>
-                <td>{{ course.hour }}</td>
-                <td>{{ course.leastgrade }}</td>
-                <td>{{ course.tname }}</td>
-                <td>{{ course.tid }}</td>
-                <td>
-                    <form action="{{ url_for('enroll_course') }}" method="POST" style="display:inline;">
-                        <input type="hidden" name="leastgrade" value="{{ course.leastgrade }}">
-                        <input type="hidden" name="sid" value="{{ session['username'] }}">
-                        <input type="hidden" name="cid" value="{{ course.cid }}">
-                        <input type="hidden" name="tid" value="{{ course.tid }}">
-                        <button type="submit" class="action-button">选课</button>
-                    </form>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+        
+    </div>
 
-    <a href="{{ url_for('home') }}">退出</a>
+    <script>
+        function searchTable() {
+            // 获取输入框的值并转换为小写
+            var input = document.getElementById("searchInput").value.toLowerCase();
+            
+            // 获取两个表格
+            var enrolledTable = document.getElementById("enrolledCoursesTable");
+            var allCoursesTable = document.getElementById("allCoursesTable");
+
+            // 过滤已选课程表格
+            filterTable(enrolledTable, input);
+            
+            // 过滤所有课程表格
+            filterTable(allCoursesTable, input);
+        }
+
+        function filterTable(table, filter) {
+            // 获取表格的所有行
+            var rows = table.getElementsByTagName("tr");
+            
+            // 遍历每一行（跳过表头）
+            for (var i = 1; i < rows.length; i++) {
+                var row = rows[i];
+                var cells = row.getElementsByTagName("td");
+                var found = false;
+                
+                // 遍历每一列
+                for (var j = 0; j < cells.length; j++) {
+                    var cell = cells[j];
+                    if (cell) {
+                        // 如果单元格的文本包含过滤条件，显示该行
+                        if (cell.textContent.toLowerCase().indexOf(filter) > -1) {
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+                
+                // 根据是否找到匹配项来显示或隐藏行
+                if (found) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+            }
+        }
+    </script>
 </body>
 </html>
