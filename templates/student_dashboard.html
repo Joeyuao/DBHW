@@ -178,7 +178,7 @@
                     <th>课时</th>
                     <th>最低年级要求</th>
                     <th>教师</th>
-                    <th>教师 ID</th>
+                    <th>学分</th>
                     <th>操作</th>
                 </tr>
             </thead>
@@ -190,7 +190,7 @@
                     <td>{{ course.hour }}</td>
                     <td>{{ course.leastgrade }}</td>
                     <td>{{ course.tname }}</td>
-                    <td>{{ course.tid }}</td>
+                    <td>{{ course.credit }}</td>
                     <td>
                         <form action="{{ url_for('enroll_course') }}" method="POST" style="display:inline;">
                             <input type="hidden" name="leastgrade" value="{{ course.leastgrade }}">

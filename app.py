@@ -233,13 +233,13 @@ def student_dashboard():
     cur.execute("""
     WITH ranked_courses AS (
         SELECT
-            courses.cid, courses.cname, courses.hour, courses.leastgrade, teachers.tname,teachers.tid,
+            courses.cid, courses.cname, courses.hour, courses.leastgrade, teachers.tname,teachers.tid,courses.credit,
             ROW_NUMBER() OVER (PARTITION BY courses.cname ORDER BY RANDOM()) AS rn
         FROM courses
         LEFT JOIN choices ON courses.cid = choices.cid
         LEFT JOIN teachers ON choices.tid = teachers.tid
     )
-    SELECT cid, cname, hour, leastgrade, tname,tid
+    SELECT cid, cname, hour, leastgrade, tname,tid,credit
     FROM ranked_courses
     WHERE rn = 1;
     """)
