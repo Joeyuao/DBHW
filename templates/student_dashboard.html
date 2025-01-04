@@ -123,7 +123,7 @@
 <body>
     <div class="container">
         <h1>学生仪表盘</h1>
-        <p>欢迎, {{ session['username'] }}!</p><br>
+        <p>欢迎, {{ session['id'] }}!</p><br>
         <a href="{{ url_for('home') }}">退出登录</a><br>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -159,7 +159,7 @@
                     <td>{{ course.score }}</td>
                     <td>
                         <form action="{{ url_for('drop_course') }}" method="POST" style="display:inline;">
-                            <input type="hidden" name="sid" value="{{ session['username'] }}">
+                            <input type="hidden" name="sid" value="{{ session['id'] }}">
                             <input type="hidden" name="cid" value="{{ course.cid }}">
                             <button type="submit" class="action-button">退课</button>
                         </form>
@@ -194,7 +194,7 @@
                     <td>
                         <form action="{{ url_for('enroll_course') }}" method="POST" style="display:inline;">
                             <input type="hidden" name="leastgrade" value="{{ course.leastgrade }}">
-                            <input type="hidden" name="sid" value="{{ session['username'] }}">
+                            <input type="hidden" name="sid" value="{{ session['id'] }}">
                             <input type="hidden" name="cid" value="{{ course.cid }}">
                             <input type="hidden" name="tid" value="{{ course.tid }}">
                             <button type="submit" class="action-button">选课</button>

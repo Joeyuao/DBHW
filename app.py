@@ -214,7 +214,7 @@ def student_dashboard():
     if 'id' not in session or session['role'] != 'student':
         print("not student")
         return redirect(url_for('home'))  # 如果未登录或不是学生，重定向到登录页
-
+    print("student",session['id'])
     id = session['id']
     conn = get_connection()
     cur = conn.cursor(cursor_factory=RealDictCursor)
@@ -272,7 +272,9 @@ def enroll_course():
         flash('您已经选过该课程！', 'error')
     else:
         cur.execute("SELECT * FROM students WHERE sid = %s", (sid,))
+        print("sid:",sid)
         grade = cur.fetchone()  # 获取查询结果的第一行
+        # print()
         print("Grade:", grade)
         grade_value = 0
         if grade:
@@ -491,7 +493,7 @@ def update_teacher():
     return redirect(url_for('manage_teachers'))
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='127.0.0.1', port=5000)
 """
 select courses.cid, courses.cname, courses.hour,courses.leastgrade,teachers.tname,teachers.tid
 from courses courses
