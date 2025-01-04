@@ -10,7 +10,7 @@ app.secret_key = 'your_secret_key'  # 用于 session 管理
 # 模拟的用户数据，密码存储为 SHA-256 哈希值
 users = {
     "teacher": {"id": "200017039", "password_hash": "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8", "role": "teacher", "courses": []},
-    "student": {"id": "867650681", "password_hash": "6cf615d5bcaac778352a8f1f3360d23f02f34ec182e259897fd6ce485d7870d4", "role": "student", "courses": []},
+    "student": {"id": "852685082", "password_hash": "6cf615d5bcaac778352a8f1f3360d23f02f34ec182e259897fd6ce485d7870d4", "role": "student", "courses": []},
     "admin": {"id": "1", "password_hash": "7c04837eb356565e28bb14e5a1dedb240a5ac2561f8ed318c54a279fb6a9665e", "role": "admin"}
 }
 
@@ -36,6 +36,8 @@ def home():
         print("id from form:",id)
         password_hash = request.form['password']  # 前端已经传递了 SHA-256 哈希值
         role = request.form['role']
+        print("password_hash from form:",password_hash)
+        print("role from form:",role)
         # 数据库查询
         conn = get_connection()
         cur = conn.cursor(cursor_factory=RealDictCursor)
@@ -58,6 +60,7 @@ def home():
             if student and student['passwordhash'] == password_hash:
                 session['id'] = id
                 session['role'] = role
+                print("登录成功")
                 return redirect(url_for('student_dashboard'))
             else:
                 flash("登录失败，请检查用户名、密码和角色")
@@ -117,12 +120,12 @@ def change_password():
         
 
             elif role == "admin":
-                # 查询管理员表（假设管理员表为 admins）
-                cur.execute("SELECT * FROM admins WHERE aid = %s", (id,))
+                # 查询管理员表（假设管理员表为 administrators）
+                cur.execute("SELECT * FROM administrators WHERE aid = %s", (id,))
                 admin = cur.fetchone()
                 if admin and admin['passwordhash'] == old_password_hash:
                     # 更新密码
-                    cur.execute("UPDATE admins SET passwordhash = %s WHERE aid = %s", (new_password_hash, id))
+                    cur.execute("UPDATE administrators SET passwordhash = %s WHERE aid = %s", (new_password_hash, id))
                     conn.commit()
                     flash("密码更新成功", "success")
                     # sleep(2)
@@ -209,6 +212,7 @@ def update_score():
 @app.route('/student_dashboard', methods=['GET', 'POST'])
 def student_dashboard():
     if 'id' not in session or session['role'] != 'student':
+        print("not student")
         return redirect(url_for('home'))  # 如果未登录或不是学生，重定向到登录页
 
     id = session['id']
@@ -225,7 +229,7 @@ def student_dashboard():
     """, (id,))
     enrolled_courses = cur.fetchall()
 
-    # # 查询所有课程+老师 fuck,老师太多了，不好展示
+    # # 查询所有课程+老师
     cur.execute("""
     WITH ranked_courses AS (
         SELECT
